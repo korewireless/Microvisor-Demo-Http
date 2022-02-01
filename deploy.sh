@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-upload_action=$(curl -X POST https://microvisor-upload.twilio.com/v1/Apps -H "Content-Type: multipart/form-data" -u ${TWILIO_API_KEY}:${TWILIO_API_SECRET} -s -F File=@./build/Code/mv-nucleo.zip)
+upload_action=$(curl -X POST https://microvisor-upload.twilio.com/v1/Apps -H "Content-Type: multipart/form-data" -u ${TWILIO_API_KEY}:${TWILIO_API_SECRET} -s -F File=@./build/app_src/microvisor-http.zip)
 
 app_sid=$(echo "${upload_action}" | jq -r '.sid')
 
