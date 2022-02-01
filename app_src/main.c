@@ -16,12 +16,6 @@ const osThreadAttr_t debug_task_attributes = {
     .stack_size = 1024
 };
 
-bool use_i2c = false;
-bool got_sensor = false;
-
-I2C_HandleTypeDef i2c;
-UART_HandleTypeDef serial;
-
 // Central store for Microvisor resource handles used in this code.
 // See `https://www.twilio.com/docs/iot/microvisor/syscalls#http_handles`
 struct {
@@ -60,11 +54,6 @@ int main(void) {
 
     // Initialize peripherals
     gpio_init();
-    //i2c_init();
-    //uart_init();
-
-    //got_sensor = MCP9808_init();
-    //if (got_sensor) temp = MCP9808_read_temp();
 
     // Init scheduler
     osKernelInitialize();
@@ -141,53 +130,15 @@ void gpio_init(void) {
   * @retval None
   */
 void start_gpio_task(void *argument) {
-    uint32_t press_debounce = 0;
-    uint32_t release_debounce = 0;
     uint32_t last_tick = 0;
-    bool pressed = false;
-    if (use_i2c) HT16K33_init();
 
     while (true) {
+        // Periodically update the display and flash the USER LED
         // Get the ms timer value and read the button
         uint32_t tick = HAL_GetTick();
-        GPIO_PinState state = HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_6);
-
-        // Check for a press or release, and debounce
-        if (state == 1 && !pressed) {
-            if (press_debounce == 0) {
-                press_debounce = tick;
-            } else if (tick - press_debounce > DEBOUNCE_PERIOD) {
-                press_debounce = 0;
-                pressed = true;
-            }
-        }
-
-        if (state == 0 && pressed) {
-            if (release_debounce == 0) {
-                release_debounce = tick;
-            } else if (tick - release_debounce > DEBOUNCE_PERIOD) {
-                release_debounce = 0;
-                show_count = !show_count;
-                pressed = false;
-            }
-        }
-
-        // Periodically update the display and flash the USER LED
         if (tick - last_tick > DEFAULT_TASK_PAUSE) {
             last_tick = tick;
             HAL_GPIO_TogglePin(LED_GPIO_BANK, LED_GPIO_PIN);
-            if (use_i2c) {
-                if (show_count) {
-                    HT16K33_show_value(counter, false);
-                } else {
-                    HT16K33_show_value((uint16_t)(temp * 100), true);
-                    HT16K33_set_alpha('c', 3, false);
-                }
-
-                HT16K33_draw();
-                counter++;
-                if (counter > 9999) counter = 0;
-            }
         }
     }
 }
@@ -213,11 +164,6 @@ void start_debug_task(void *argument) {
         printf("Debug ping %lu seconds\n", n++);
         if (n % 100 == 0 && request_sent) {
             request_sent = false;
-        }
-
-        if (got_sensor) {
-            temp = MCP9808_read_temp();
-            if (n % 10 == 0) printf("Temperature: %.02f\n", temp);
         }
 
         if (!request_sent) {

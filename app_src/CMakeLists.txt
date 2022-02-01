@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(BUILD_NUMBER "100")
+set(BUILD_NUMBER "1")
 add_definitions(-DBUILD_NUM=${BUILD_NUMBER})
 
 add_executable(microvisor-http

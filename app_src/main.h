@@ -14,15 +14,14 @@
 #include <unistd.h>
 #include <errno.h>
 
+// Microvisor includes
 #include "stm32u5xx_hal.h"
 #include "cmsis_os.h"
 #include "mv_syscalls.h"
 
+// App includes
 #include "logging.h"
-#include "ht16k33.h"
-#include "i2c.h"
-#include "mcp9808.h"
-#include "uart.h"
+
 
 #ifdef __cplusplus
 extern "C" {
