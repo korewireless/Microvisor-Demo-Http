@@ -4,7 +4,7 @@ This repo provides a basic demonstration of a user application capable of workin
 
 It is based on the [FreeRTOS](https://freertos.org/) real-time operating system and which will run on the “non-secure” side of Microvisor. FreeRTOS is included as a submodule.
 
-The application code files can be found in the [app\_src/](app_src/) directory. The [ST\_Code/](ST_Code/) directory contains required components that are not part of Twilio Microvisor STM32U5 HAL, which this sample accesses as a submodule. The `FreeRTOSConfig.h` and `stm32u5xx\_hal\_conf.h` configuration files are located in the [config/](config/) directory.
+The application code files can be found in the [app_src/](app_src/) directory. The [ST_Code/](ST_Code/) directory contains required components that are not part of Twilio Microvisor STM32U5 HAL, which this sample accesses as a submodule. The `FreeRTOSConfig.h` and `stm32u5xx_hal_conf.h` configuration files are located in the [config/](config/) directory.
 
 ## Actions
 
@@ -63,11 +63,11 @@ twilio plugins:install @twilio/plugin-microvisor
 Running the Twilio CLI and the project's [deploy script](./deploy.sh) — for uploading the built code to the Twilio cloud and subsequent deployment to your Microvisor Nucleo Board — uses the following Twilio credentials stored as environment variables. They should be added to your shell profile:
 
 ```bash
-export TWILIO\_ACCOUNT\_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-export TWILIO\_AUTH\_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-export TWILIO\_API\_KEY=SKxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-export TWILIO\_API\_SECRET=YKxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-export MV\_DEVICE\_SID=UVxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+export TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+export TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+export TWILIO_API_KEY=SKxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+export TWILIO_API_SECRET=YKxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+export MV_DEVICE_SID=UVxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 You can get the first two from your Twilio Console [account dashboard](https://console.twilio.com/).
@@ -78,10 +78,10 @@ Restart your terminal and enter the following command:
 
 ```bash
 curl https://microvisor.twilio.com/v1/Devices \
-  -u ${TWILIO\_ACCOUNT\_SID}:${TWILIO\_AUTH\_TOKEN} -s | jq
+  -u ${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN} -s | jq
 ```
 
-This will yield JSON which contains a `device` array — your Microvisor Nucleo Board will be in that array. Use the value of its `sid` field for your `MV\_DEVICE\_SID` value.
+This will yield JSON which contains a `device` array — your Microvisor Nucleo Board will be in that array. Use the value of its `sid` field for your `MV_DEVICE_SID` value.
 
 ## Build the Code
 
@@ -108,7 +108,7 @@ This will upload the build and stage it for deployment to your device. If you en
 You can start log streaming with this command:
 
 ```bash
-twilio microvisor:logs:stream ${MV\_DEVICE\_SID}
+twilio microvisor:logs:stream ${MV_DEVICE_SID}
 ```
 
 ## Copyright and Licensing
