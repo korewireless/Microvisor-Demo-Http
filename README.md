@@ -26,7 +26,9 @@ git clone --recursive https://github.com/TwilioDevEd/microvisor-http.git
 
 You will need a Twilio account. [Sign up now if you don’t have one](https://www.twilio.com/try-twilio).
 
-This project is written in C. At this time, we support Ubuntu 20.0.4. Users of other operating systems can build the code under a virtual machine running Ubuntu.
+You will also need a Twilio Microvisor Nucleo Development Board. These are currently only available to Private Beta program participants.
+
+This project is written in C. At this time, we only support Ubuntu 20.0.4. Users of other operating systems should build the code under a virtual machine running Ubuntu.
 
 **Note** macOS users may attempt to install the pre-requisites below using [Homebrew](https://brew.sh). This is not supported, but should work. You may need to change the names of a few of the packages listed in the `apt install` command below.
 
@@ -34,8 +36,8 @@ Under Ubuntu, run the following:
 
 ```bash
 sudo apt install gcc-arm-none-eabi binutils-arm-none-eabi git \
-  python3 python3-pip build-essential protobuf-compiler \
-  cmake libsecret-1-dev curl jq
+                 python3 python3-pip build-essential protobuf-compiler \
+                 cmake libsecret-1-dev curl jq
 ```
 
 Now run:
@@ -58,7 +60,7 @@ npm install twilio-cli -g
 twilio plugins:install @twilio/plugin-microvisor
 ```
 
-Running the Twilio CLI and the project's deploy script — for uploading the built code to the Twilio cloud and subsequent deployment to your Microvisor Nucleo Board — uses the following Twilio credentials stored as environment variables. They should be added to your shell profile:
+Running the Twilio CLI and the project's [deploy script](./deploy.sh) — for uploading the built code to the Twilio cloud and subsequent deployment to your Microvisor Nucleo Board — uses the following Twilio credentials stored as environment variables. They should be added to your shell profile:
 
 ```
 export TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -109,8 +111,10 @@ You can start log streaming with this command:
 twilio microvisor:logs:stream ${MV_DEVICE_SID}
 ```
 
-## Copyright
+## Copyright and Licensing
 
-The sample code is © 2022, Twilio, Inc.
+The sample code and Microvisor SDK is © 2022, Twilio, Inc. It is licensed under the terms of the [Apache 2.0 License](./LICENSE).
 
-FreeRTOS is © 2022, Amazon Web Services, Inc
+The SDK makes used of code © 2021, STMicroelectronics and affiliates. This code is licensed under terms described in [this file](https://github.com/twilio/twilio-microvisor-hal-stm32u5/blob/main/LICENSE-STM32CubeU5.md).
+
+FreeRTOS is © 2021, Amazon Web Services, Inc. It is licensed under the terms of the [Apache 2.0 License](./LICENSE).

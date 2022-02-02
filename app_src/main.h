@@ -3,7 +3,7 @@
  * Microvisor HTTP Communications Demo
  * Version 1.0.0
  * Copyright © 2022, Twilio
- * Licence: MIT
+ * Licence: Apache 2.0
  *
  */
 #ifndef _MAIN_H_
