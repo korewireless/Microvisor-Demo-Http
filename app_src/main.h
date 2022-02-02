@@ -1,8 +1,13 @@
+/**
+ *
+ * Microvisor HTTP Communications Demo
+ * Version 1.0.0
+ * Copyright © 2022, Twilio
+ * Licence: MIT
+ *
+ */
 #ifndef _MAIN_H_
 #define _MAIN_H_
-
-
-
 
 
 /*

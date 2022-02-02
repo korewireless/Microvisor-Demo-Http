@@ -1,3 +1,11 @@
+/**
+ *
+ * Microvisor HTTP Communications Demo
+ * Version 1.0.0
+ * Copyright © 2022, Twilio
+ * Licence: MIT
+ *
+ */
 #ifndef LOGGING_H
 #define LOGGING_H
 
@@ -14,7 +22,6 @@ extern "C" {
 void log_open_channel(void);
 void log_close_channel(void);
 MvNetworkHandle get_net_handle();
-void server_log(const char *str);
 
 
 #ifdef __cplusplus

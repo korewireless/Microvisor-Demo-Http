@@ -1,3 +1,11 @@
+/**
+ *
+ * Microvisor HTTP Communications Demo
+ * Version 1.0.0
+ * Copyright © 2022, Twilio
+ * Licence: MIT
+ *
+ */
 #include "main.h"
 
 
@@ -10,8 +18,6 @@ struct {
 static volatile struct MvNotification log_notification_buffer[16];
 
 
-
-
 void log_open_channel(void) {
     memset((void *)log_notification_buffer, 0xff, sizeof(log_notification_buffer));
     static struct MvNotificationSetup log_notification_setup = {
@@ -19,7 +25,7 @@ void log_open_channel(void) {
         .buffer = (struct MvNotification *)log_notification_buffer,
         .buffer_size = sizeof(log_notification_buffer)
     };
-    
+
     uint32_t status = mvSetupNotifications(&log_notification_setup, &log_handles.notification);
     assert(status == MV_STATUS_OKAY);
 
@@ -33,7 +39,7 @@ void log_open_channel(void) {
             .notification_tag = USER_TAG_LOGGING_REQUEST_NETWORK,
         }
     };
-    
+
     status = mvRequestNetwork(&nw_params, &log_handles.network);
     assert(status == MV_STATUS_OKAY);
 
@@ -62,7 +68,7 @@ void log_open_channel(void) {
             status == MV_NETWORKSTATUS_CONNECTED) {
             break;
         }
-        
+
         for (volatile unsigned i = 0; i < 50000; i++) {} // busy delay
     }
 
@@ -76,19 +82,19 @@ void log_close_channel(void) {
         uint32_t status = mvCloseChannel(&log_handles.channel);
         assert(status == MV_STATUS_OKAY);
     }
-    
+
     assert(log_handles.channel == 0);
     if (log_handles.network != 0) {
         uint32_t status = mvReleaseNetwork(&log_handles.network);
         assert(status == MV_STATUS_OKAY);
     }
-    
+
     assert(log_handles.network == 0);
     if (log_handles.notification != 0) {
         uint32_t status = mvCloseNotifications(&log_handles.notification);
         assert(status == MV_STATUS_OKAY);
     }
-    
+
     assert(log_handles.notification == 0);
 
     NVIC_DisableIRQ(TIM1_BRK_IRQn);
@@ -96,32 +102,28 @@ void log_close_channel(void) {
 }
 
 
+/**
+ *  Return the network handle to the caller.
+ *
+ *  @returns The network handle (uint32_t).
+ *
+ */
 MvNetworkHandle get_net_handle() {
     return log_handles.network;
 }
 
 
 void TIM1_BRK_IRQHandler(void) {
-
-}
-
-void server_log(const char *str)
-{
-    if (log_handles.channel == 0) {
-        log_open_channel();
-    }
-    
-    uint32_t available, status;
-    status = mvWriteChannel(log_handles.channel, (const uint8_t*)str, strlen(str), &available);
-    assert(status == MV_STATUS_OKAY);
-    status = mvWriteChannel(log_handles.channel, (const uint8_t*)"\n", 1, &available);
-    assert(status == MV_STATUS_OKAY);
+    // Catch network and channel events here
 }
 
 
-// wire up stdio syscall, so printf works
-int _write(int file, char *ptr, int len)
-{
+/**
+ *  Wire up stdio syscall, so printf() works
+ *  as a logging source
+ *
+ */
+int _write(int file, char *ptr, int len) {
     if (file != STDOUT_FILENO) {
         errno = EBADF;
         return -1;
