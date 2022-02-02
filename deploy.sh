@@ -16,7 +16,7 @@ else
         echo "Updated device ${MV_DEVICE_SID} @ ${up_date}"
 
         if [[ $1 == "-l" ]]; then
-            echo "Logging..."
+            echo "Logging from ${MV_DEVICE_SID}..."
             twilio microvisor:logs:stream ${MV_DEVICE_SID}
         fi
     else
