@@ -12,6 +12,8 @@
 /**
  *  Define FreeRTOS thread tasks
  */
+
+// This is the task that flashed the USER LED
 osThreadId_t GPIOTask;
 const osThreadAttr_t gpio_task_attributes = {
     .name = "GPIOTask",
@@ -19,6 +21,7 @@ const osThreadAttr_t gpio_task_attributes = {
     .stack_size = 1024
 };
 
+// This is the task that sends HTTP requests
 osThreadId_t DebugTask;
 const osThreadAttr_t debug_task_attributes = {
     .name = "DebugTask",
