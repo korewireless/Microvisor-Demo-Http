@@ -28,6 +28,8 @@ You will need a Twilio account. [Sign up now if you don’t have one](https://ww
 
 You will also need a Twilio Microvisor Nucleo Development Board. These are currently only available to Private Beta program participants.
 
+## Software Setup
+
 This project is written in C. At this time, we only support Ubuntu 20.0.4. Users of other operating systems should build the code under a virtual machine running Ubuntu.
 
 **Note** macOS users may attempt to install the pre-requisites below using [Homebrew](https://brew.sh). This is not supported, but should work. You may need to change the names of a few of the packages listed in the `apt install` command below.
@@ -98,14 +100,16 @@ cmake --build build --clean-first
 Run:
 
 ```bash
-./deploy.sh
+./deploy.sh --log
 ```
 
 This will upload the build and stage it for deployment to your device. If you encounter errors, please check your stored Twilio credentials.
 
-## View log output
+The `--log` flag initiates log-streaming.
 
-You can start log streaming with this command:
+## View Log Output
+
+You can start log streaming separately — for example, in a second terminal windoow — with this command:
 
 ```bash
 twilio microvisor:logs:stream ${MV_DEVICE_SID}
