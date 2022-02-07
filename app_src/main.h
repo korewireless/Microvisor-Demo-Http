@@ -64,6 +64,8 @@ void        http_process_response(void);
 
 void        log_device_info(void);
 
+void        output_headers(uint32_t n);
+
 
 #ifdef __cplusplus
 }

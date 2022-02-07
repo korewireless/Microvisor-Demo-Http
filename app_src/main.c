@@ -392,8 +392,8 @@ void http_process_response(void) {
                     // Retrieved the body data successfully so log it
                     printf("[DEBUG] HTTP response header count: %lu\n", resp_data.num_headers);
                     printf("[DEBUG] HTTP response body length: %lu\n", resp_data.body_length);
-                    printf((char *)buffer);
-                    printf("\n");
+                    printf("%s\n", buffer);
+                    output_headers(resp_data.num_headers);
                 } else {
                     printf("[ERROR] HTTP response body read status %lu\n", status);
                 }
@@ -409,6 +409,21 @@ void http_process_response(void) {
 }
 
 
+void output_headers(uint32_t n) {
+    uint32_t status = 0;
+    uint8_t buffer[129];
+    for (uint32_t i = 0 ; i < n ; i++) {
+        memset((void *)buffer, 0x00, 129);
+        status = mvReadHttpResponseHeader(http_handles.channel, i, buffer, 128);
+        if (status == MV_STATUS_OKAY) {
+            printf("%lu. %s\n", i + 1, buffer);
+        } else {
+            printf("[ERROR] Could not read header %lu\n", i + 1);
+        }
+    }
+}
+
+
 /**
  * @brief   Show basic device info.
  *
@@ -416,8 +431,5 @@ void http_process_response(void) {
 void log_device_info(void) {
     uint8_t buffer[35] = { 0 };
     mvGetDeviceId(buffer, 34);
-    printf("Dev ID: ");
-    printf((char *)buffer);
-    printf("\n");
-    printf("Build: %i\n", BUILD_NUM);
+    printf("Dev ID: %s\nBuild: %i\n", buffer, BUILD_NUM);
 }
