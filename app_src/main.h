@@ -16,6 +16,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
 
@@ -43,22 +44,25 @@ extern "C" {
 #define     DEBUG_TASK_PAUSE        1000
 #define     DEFAULT_TASK_PAUSE      500
 
-#define     DEBOUNCE_PERIOD         20
+#define     REQUEST_SEND_PERIOD     30000
+#define     CHANNEL_KILL_PERIOD     15000
 
 
 /*
  * PROTOTYPES
  */
 void        system_clock_config(void);
-void        start_gpio_task(void *argument);
-void        start_debug_task(void *argument);
-void        error_handler(void);
-
 void        gpio_init(void);
+void        start_led_task(void *argument);
+void        start_http_task(void *argument);
 
+void        http_channel_center_setup(void);
 void        http_open_channel(void);
 void        http_close_channel(void);
 bool        http_send_request();
+void        http_process_response(void);
+
+void        log_device_info(void);
 
 
 #ifdef __cplusplus

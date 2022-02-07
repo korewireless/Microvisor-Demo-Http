@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 set(BUILD_NUMBER "1")
-add_definitions(-DBUILD_NUM=${BUILD_NUMBER})
+add_compile_definitions(BUILD_NUM=${BUILD_NUMBER})
 
 add_executable(microvisor-http
     main.c
@@ -25,7 +25,6 @@ add_custom_command(OUTPUT EXTRAS
     COMMAND python3 ../../twilio-microvisor-tools/bundler-py/bundler.py microvisor-http.elf microvisor-http.zip
     COMMAND rm -f ../../null.d
     COMMAND echo "LATEST BUILD: ${BUILD_NUMBER}"
-
 )
 
 add_custom_target(extras ALL
