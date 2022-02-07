@@ -13,7 +13,7 @@
 
 # GLOBALS
 do_log=0
-zip_path="./build/app_src/microvisor-http.zip"
+zip_path="./build/app_src/microvisor-http-demo.zip"
 
 # FUNCTIONS
 show_help() {
