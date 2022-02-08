@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 set(BUILD_NUMBER "1")
 add_compile_definitions(BUILD_NUM=${BUILD_NUMBER})
+add_compile_definitions(APP_NAME="Microvisor HTTP Demo")
 
 add_executable(microvisor-http-demo
     main.c

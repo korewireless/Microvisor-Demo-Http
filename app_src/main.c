@@ -82,6 +82,7 @@ int main(void) {
 
 /**
   * @brief Get the MV clock value.
+  *
   * @returns The clock value.
   */
 uint32_t SECURE_SystemCoreClockUpdate() {
@@ -104,7 +105,6 @@ void system_clock_config(void) {
   * @brief Initialize the MCU GPIO.
   *
   * Used to flash the Nucleo's USER LED, which is on GPIO Pin PA5.
-  *
   */
 void gpio_init(void) {
     // Enable GPIO port clock
@@ -127,7 +127,6 @@ void gpio_init(void) {
   * @brief Function implementing the LED-flash task thread.
   *
   * @param  argument: Not used.
-  *
   */
 void start_led_task(void *argument) {
     uint32_t last_tick = 0;
@@ -154,7 +153,6 @@ void start_led_task(void *argument) {
   * @brief Function implementing the FreeRTOS HTTP task thread.
   *
   * @param  argument: Not used.
-  *
   */
 void start_http_task(void *argument) {
     uint32_t ping_count = 1;
@@ -278,7 +276,6 @@ void http_close_channel(void) {
 
 /**
  * @brief   Configure the channel Notification Center.
- *
  */
 void http_channel_center_setup(void) {
     // Clear the notification store
@@ -304,10 +301,9 @@ void http_channel_center_setup(void) {
 
 
 /**
- *  @brief Send a stock HTTP request.
+ * @brief Send a stock HTTP request.
  *
  * @returns `true` if the request was accepted by Microvisor, otherwise `false`
- *
  */
 bool http_send_request() {
     // Make sure we have a valid channel handle
@@ -409,6 +405,9 @@ void http_process_response(void) {
 }
 
 
+/**
+ * @brief Output all received headers.
+ */
 void output_headers(uint32_t n) {
     uint32_t status = 0;
     uint8_t buffer[129];
@@ -425,11 +424,10 @@ void output_headers(uint32_t n) {
 
 
 /**
- * @brief   Show basic device info.
- *
+ * @brief Show basic device info.
  */
 void log_device_info(void) {
     uint8_t buffer[35] = { 0 };
     mvGetDeviceId(buffer, 34);
-    printf("Dev ID: %s\nBuild: %i\n", buffer, BUILD_NUM);
+    printf("Device: %s\n   App: %s\n Build: %i\n", buffer, APP_NAME, BUILD_NUM);
 }

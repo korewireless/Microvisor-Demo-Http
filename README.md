@@ -19,7 +19,14 @@ The second thread It also emits a “ping” to the Microvisor logger once a sec
 This repo makes uses of git submodules, some of which are nested within other submodules. To clone the repo, run:
 
 ```bash
-git clone --recursive https://github.com/TwilioDevEd/microvisor-http.git
+git clone https://github.com/TwilioDevEd/microvisor-http-demo.git
+```
+
+and then:
+
+```bash
+cd microvisor-http-demo
+git submodule update --init --recursive
 ```
 
 ## Requirements
@@ -95,7 +102,7 @@ cmake -S . -B build/
 cmake --build build --clean-first
 ```
 
-## Deploy the code
+## Deploy the Application
 
 Run:
 
@@ -109,7 +116,7 @@ The `--log` flag initiates log-streaming.
 
 ## View Log Output
 
-You can start log streaming separately — for example, in a second terminal windoow — with this command:
+You can start log streaming separately — for example, in a second terminal window — with this command:
 
 ```bash
 twilio microvisor:logs:stream ${MV_DEVICE_SID}
