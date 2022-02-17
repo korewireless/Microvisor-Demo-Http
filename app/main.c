@@ -394,10 +394,10 @@ void http_process_response(void) {
                     printf("[ERROR] HTTP response body read status %lu\n", status);
                 }
             } else {
-                printf("[ERROR] HTTP status code: %lu", resp_data.status_code);
+                printf("[ERROR] HTTP status code: %lu\n", resp_data.status_code);
             }
         } else {
-            printf("[ERROR] Request failed. Status: %lu", (uint32_t)resp_data.result);;
+            printf("[ERROR] Request failed. Status: %lu\n", (uint32_t)resp_data.result);;
         }
     } else {
         printf("[ERROR] Response data read failed. Status: %lu\n", status);
@@ -410,10 +410,10 @@ void http_process_response(void) {
  */
 void output_headers(uint32_t n) {
     uint32_t status = 0;
-    uint8_t buffer[129];
+    uint8_t buffer[256];
     for (uint32_t i = 0 ; i < n ; i++) {
-        memset((void *)buffer, 0x00, 129);
-        status = mvReadHttpResponseHeader(http_handles.channel, i, buffer, 128);
+        memset((void *)buffer, 0x00, 256);
+        status = mvReadHttpResponseHeader(http_handles.channel, i, buffer, 255);
         if (status == MV_STATUS_OKAY) {
             printf("%lu. %s\n", i + 1, buffer);
         } else {

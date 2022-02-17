@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain.cmake")
 
-project(microvisor-http-demo C ASM)
+project(mv-http-demo C ASM)
 
 include_directories(include
                     ${twilio-microvisor-hal-stm32u5_INCLUDE_DIRS})
@@ -30,10 +30,6 @@ set(INCLUDED_HAL_FILES
     Drivers/CMSIS/Device/ST/STM32U5xx/Source/Templates/gcc/startup_stm32u585xx.s
     Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_uart.c
     Drivers/STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_uart_ex.c
-)
-
-set(CONFIG_DIRECTORY
-    "${CMAKE_SOURCE_DIR}/config"
 )
 
 add_subdirectory(twilio-microvisor-hal-stm32u5)
@@ -72,6 +68,4 @@ target_include_directories(FreeRTOS PUBLIC
     FreeRTOS-Kernel/portable/GCC/ARM_CM33_NTZ/non_secure
 )
 
-add_subdirectory(app_src)
-
-unset(CONFIG_DIRECTORY)
+add_subdirectory(app)
