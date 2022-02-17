@@ -7,13 +7,13 @@
 #
 # @author    Tony Smith
 # @copyright 2022, Twilio
-# @version   1.0.0
+# @version   1.0.1
 # @license   MIT
 #
 
 # GLOBALS
 do_log=0
-zip_path="./build/app_src/microvisor-http-demo.zip"
+zip_path="./build/app/mv-http-demo.zip"
 
 # FUNCTIONS
 show_help() {
@@ -27,7 +27,7 @@ show_help() {
 
 stream_log() {
     echo "Logging from ${MV_DEVICE_SID}..."
-    twilio microvisor:logs:stream ${MV_DEVICE_SID}
+    twilio microvisor:logs:stream "${MV_DEVICE_SID}"
 }
 
 # RUNTIME START
@@ -52,7 +52,7 @@ fi
 
 # Try to upload the bundle
 echo "Uploading ${zip_path}..."
-upload_action=$(curl -X POST https://microvisor-upload.twilio.com/v1/Apps -H "Content-Type: multipart/form-data" -u ${TWILIO_API_KEY}:${TWILIO_API_SECRET} -s -F File=@"${zip_path}")
+upload_action=$(curl -X POST https://microvisor-upload.twilio.com/v1/Apps -H "Content-Type: multipart/form-data" -u "${TWILIO_API_KEY}:${TWILIO_API_SECRET}" -s -F File=@"${zip_path}")
 
 app_sid=$(echo "${upload_action}" | jq -r '.sid')
 
@@ -62,7 +62,7 @@ if [[ -z "${app_sid}" ]]; then
 else
     # Success... try to assign the app
     echo "Assigning app ${app_sid} to device ${MV_DEVICE_SID}..."
-    update_action=$(curl -X POST https://microvisor.twilio.com/v1/Devices/${MV_DEVICE_SID} -u ${TWILIO_API_KEY}:${TWILIO_API_SECRET} -s -d AppSid=${app_sid})
+    update_action=$(curl -X POST "https://microvisor.twilio.com/v1/Devices/${MV_DEVICE_SID}" -u "${TWILIO_API_KEY}:${TWILIO_API_SECRET}" -s -d AppSid="${app_sid}")
     up_date=$(echo "${update_action}" | jq -r '.date_updated')
 
     if [[ "${up_date}" != "null" ]]; then
