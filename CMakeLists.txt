@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.14)
 
+set(PROJECT_NAME "mv-http-demo")
+
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain.cmake")
 
-project(mv-http-demo C ASM)
+project(${PROJECT_NAME} C ASM)
 
 include_directories(include
                     ${twilio-microvisor-hal-stm32u5_INCLUDE_DIRS})
