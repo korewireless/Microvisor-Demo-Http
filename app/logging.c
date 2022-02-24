@@ -26,7 +26,7 @@ void log_open_channel(void) {
         .buffer_size = sizeof(log_notification_buffer)
     };
 
-    uint32_t status = mvSetupNotifications(&log_notification_setup, &log_handles.notification);
+    enum MvStatus status = mvSetupNotifications(&log_notification_setup, &log_handles.notification);
     assert(status == MV_STATUS_OKAY);
 
     NVIC_ClearPendingIRQ(TIM1_BRK_IRQn);
@@ -79,19 +79,19 @@ void log_open_channel(void) {
 
 void log_close_channel(void) {
     if (log_handles.channel != 0) {
-        uint32_t status = mvCloseChannel(&log_handles.channel);
+        enum MvStatus status = mvCloseChannel(&log_handles.channel);
         assert(status == MV_STATUS_OKAY);
     }
 
     assert(log_handles.channel == 0);
     if (log_handles.network != 0) {
-        uint32_t status = mvReleaseNetwork(&log_handles.network);
+        enum MvStatus status = mvReleaseNetwork(&log_handles.network);
         assert(status == MV_STATUS_OKAY);
     }
 
     assert(log_handles.network == 0);
     if (log_handles.notification != 0) {
-        uint32_t status = mvCloseNotifications(&log_handles.notification);
+        enum MvStatus status = mvCloseNotifications(&log_handles.notification);
         assert(status == MV_STATUS_OKAY);
     }
 
@@ -133,8 +133,8 @@ int _write(int file, char *ptr, int len) {
         log_open_channel();
     }
 
-    uint32_t written, status;
-    status = mvWriteChannelStream(log_handles.channel, (const uint8_t*)ptr, len, &written);
+    uint32_t written;
+    enum MvStatus status = mvWriteChannelStream(log_handles.channel, (const uint8_t*)ptr, len, &written);
     if (status == MV_STATUS_OKAY) {
         return written;
     } else {
