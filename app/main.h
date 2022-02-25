@@ -39,13 +39,12 @@ extern "C" {
  */
 #define     LED_GPIO_BANK           GPIOA
 #define     LED_GPIO_PIN            GPIO_PIN_5
-#define     LED_FLASH_PERIOD        1000
 
-#define     DEBUG_TASK_PAUSE        1000
-#define     DEFAULT_TASK_PAUSE      500
+#define     DEBUG_TASK_PAUSE_MS     1000
+#define     DEFAULT_TASK_PAUSE_MS   500
 
-#define     REQUEST_SEND_PERIOD     30000
-#define     CHANNEL_KILL_PERIOD     15000
+#define     REQUEST_SEND_PERIOD_MS  30000
+#define     CHANNEL_KILL_PERIOD_MS  15000
 
 
 /*
@@ -57,7 +56,7 @@ void        start_led_task(void *argument);
 void        start_http_task(void *argument);
 
 void        http_channel_center_setup(void);
-void        http_open_channel(void);
+bool        http_open_channel(void);
 void        http_close_channel(void);
 bool        http_send_request();
 void        http_process_response(void);

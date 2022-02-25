@@ -136,7 +136,7 @@ void start_led_task(void *argument) {
         // Periodically update the display and flash the USER LED
         // Get the ms timer value
         uint32_t tick = HAL_GetTick();
-        if (tick - last_tick > DEFAULT_TASK_PAUSE) {
+        if (tick - last_tick > DEFAULT_TASK_PAUSE_MS) {
             last_tick = tick;
 
             // Toggle the USER LED's GPIO pin
@@ -169,14 +169,13 @@ void start_http_task(void *argument) {
     // Run the thread's main loop
     while (true) {
         uint32_t tick = HAL_GetTick();
-        if (tick - send_tick > REQUEST_SEND_PERIOD) {
+        if (tick - send_tick > REQUEST_SEND_PERIOD_MS) {
             // Display the current count
             send_tick = tick;
             printf("[DEBUG] Ping %lu\n", ping_count++);
 
             // No channel open? Try and send the temperature
-            if (http_handles.channel == 0) {
-                http_open_channel();
+            if (http_handles.channel == 0 && http_open_channel()) {
                 bool result = http_send_request();
                 if (!result) close_channel = true;
                 kill_time = tick;
@@ -192,7 +191,7 @@ void start_http_task(void *argument) {
 
         // Use 'kill_time' to force-close an open HTTP channel
         // if it's been left open too long
-        if (kill_time > 0 && tick - kill_time > CHANNEL_KILL_PERIOD) {
+        if (kill_time > 0 && tick - kill_time > CHANNEL_KILL_PERIOD_MS) {
             close_channel = true;
         }
 
@@ -213,8 +212,10 @@ void start_http_task(void *argument) {
 
 /**
  *  @brief Open a new HTTP channel.
+ *
+ *  @retval `true` if the channel is open, otherwise `false`.
  */
-void http_open_channel(void) {
+bool http_open_channel(void) {
     // Set up the HTTP channel's multi-use send and receive buffers
     static volatile uint8_t http_rx_buffer[1536] __attribute__((aligned(512)));
     static volatile uint8_t http_tx_buffer[512] __attribute__((aligned(512)));
@@ -224,7 +225,7 @@ void http_open_channel(void) {
     // NOTE This is set in `logging.c` which puts the network in place
     //      (ie. so the network handle != 0) well in advance of this being called
     http_handles.network = get_net_handle();
-    assert(http_handles.network != 0);
+    if (http_handles.network == 0) return false;
     printf("[DEBUG] Network handle: %lu\n", (uint32_t)http_handles.network);
 
     // Configure the required data channel
@@ -249,10 +250,12 @@ void http_open_channel(void) {
     enum MvStatus status = mvOpenChannel(&channel_config, &http_handles.channel);
     if (status == MV_STATUS_OKAY) {
         printf("[DEBUG] HTTP channel handle: %lu\n", (uint32_t)http_handles.channel);
-        assert(http_handles.channel != 0);
+        return true;
     } else {
         printf("[ERROR] HTTP channel opening failed. Status: %i\n", status);
     }
+    
+    return false;
 }
 
 
@@ -266,11 +269,11 @@ void http_close_channel(void) {
     if (http_handles.channel != 0) {
         enum MvStatus status = mvCloseChannel(&http_handles.channel);
         printf("[DEBUG] HTTP channel closed\n");
-        assert(status == MV_STATUS_OKAY);
+        assert((status == MV_STATUS_OKAY || status == MV_STATUS_CHANNELCLOSED) && "[ERROR] Channel closure");
     }
 
     // Confirm the channel handle has been invalidated by Microvisor
-    assert(http_handles.channel == 0);
+    assert((http_handles.channel == 0) && "[ERROR] Channel handle not zero");
 }
 
 
@@ -291,7 +294,7 @@ void http_channel_center_setup(void) {
     // Ask Microvisor to establish the notification center
     // and confirm that it has accepted the request
     uint32_t status = mvSetupNotifications(&http_notification_setup, &http_handles.notification);
-    assert(status == MV_STATUS_OKAY);
+    assert((status == MV_STATUS_OKAY) && "[ERROR] Could not set up HTTP channel NC");
 
     // Start the notification IRQ
     NVIC_ClearPendingIRQ(TIM8_BRK_IRQn);
@@ -397,7 +400,7 @@ void http_process_response(void) {
                 printf("[ERROR] HTTP status code: %lu\n", resp_data.status_code);
             }
         } else {
-            printf("[ERROR] Request failed. Status: %lu\n", (uint32_t)resp_data.result);;
+            printf("[ERROR] Request failed. Status: %i\n", resp_data.result);;
         }
     } else {
         printf("[ERROR] Response data read failed. Status: %i\n", status);
@@ -407,17 +410,21 @@ void http_process_response(void) {
 
 /**
  * @brief Output all received headers.
+ *
+ * @param n: The number of headers to list.
  */
 void output_headers(uint32_t n) {
-    enum MvStatus status = 0;
-    uint8_t buffer[256];
-    for (uint32_t i = 0 ; i < n ; i++) {
-        memset((void *)buffer, 0x00, 256);
-        status = mvReadHttpResponseHeader(http_handles.channel, i, buffer, 255);
-        if (status == MV_STATUS_OKAY) {
-            printf("%lu. %s\n", i + 1, buffer);
-        } else {
-            printf("[ERROR] Could not read header %lu\n", i + 1);
+    if (n > 0) {
+        enum MvStatus status = MV_STATUS_OKAY;
+        uint8_t buffer[256];
+        for (uint32_t i = 0 ; i < n ; ++i) {
+            memset((void *)buffer, 0x00, 256);
+            status = mvReadHttpResponseHeader(http_handles.channel, i, buffer, 255);
+            if (status == MV_STATUS_OKAY) {
+                printf("%lu. %s\n", i + 1, buffer);
+            } else {
+                printf("[ERROR] Could not read header %lu\n", i + 1);
+            }
         }
     }
 }
