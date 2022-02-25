@@ -37,14 +37,17 @@ extern "C" {
 /*
  * CONSTANTS
  */
-#define     LED_GPIO_BANK           GPIOA
-#define     LED_GPIO_PIN            GPIO_PIN_5
+#define     LED_GPIO_BANK               GPIOA
+#define     LED_GPIO_PIN                GPIO_PIN_5
 
-#define     DEBUG_TASK_PAUSE_MS     1000
-#define     DEFAULT_TASK_PAUSE_MS   500
+#define     DEBUG_TASK_PAUSE_MS         1000
+#define     DEFAULT_TASK_PAUSE_MS       500
 
-#define     REQUEST_SEND_PERIOD_MS  30000
-#define     CHANNEL_KILL_PERIOD_MS  15000
+#define     REQUEST_SEND_PERIOD_MS      30000
+#define     CHANNEL_KILL_PERIOD_MS      15000
+
+#define     HTTP_RX_BUFFER_SIZE_B       1536
+#define     HTTP_TX_BUFFER_SIZE_B       512
 
 
 /*

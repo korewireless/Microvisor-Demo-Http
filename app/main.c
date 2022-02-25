@@ -217,9 +217,9 @@ void start_http_task(void *argument) {
  */
 bool http_open_channel(void) {
     // Set up the HTTP channel's multi-use send and receive buffers
-    static volatile uint8_t http_rx_buffer[1536] __attribute__((aligned(512)));
-    static volatile uint8_t http_tx_buffer[512] __attribute__((aligned(512)));
-    const char endpoint[] = "";
+    static volatile uint8_t http_rx_buffer[HTTP_RX_BUFFER_SIZE_B] __attribute__((aligned(512)));
+    static volatile uint8_t http_tx_buffer[HTTP_TX_BUFFER_SIZE_B] __attribute__((aligned(512)));
+    static const char endpoint[] = "";
 
     // Get the network channel handle.
     // NOTE This is set in `logging.c` which puts the network in place
@@ -268,8 +268,8 @@ void http_close_channel(void) {
     // the closure request.
     if (http_handles.channel != 0) {
         enum MvStatus status = mvCloseChannel(&http_handles.channel);
-        printf("[DEBUG] HTTP channel closed\n");
         assert((status == MV_STATUS_OKAY || status == MV_STATUS_CHANNELCLOSED) && "[ERROR] Channel closure");
+        printf("[DEBUG] HTTP channel closed\n");
     }
 
     // Confirm the channel handle has been invalidated by Microvisor
@@ -293,7 +293,7 @@ void http_channel_center_setup(void) {
 
     // Ask Microvisor to establish the notification center
     // and confirm that it has accepted the request
-    uint32_t status = mvSetupNotifications(&http_notification_setup, &http_handles.notification);
+    enum MvStatus status = mvSetupNotifications(&http_notification_setup, &http_handles.notification);
     assert((status == MV_STATUS_OKAY) && "[ERROR] Could not set up HTTP channel NC");
 
     // Start the notification IRQ
@@ -392,7 +392,7 @@ void http_process_response(void) {
                     printf("[DEBUG] HTTP response header count: %lu\n", resp_data.num_headers);
                     printf("[DEBUG] HTTP response body length: %lu\n", resp_data.body_length);
                     printf("%s\n", buffer);
-                    output_headers(resp_data.num_headers);
+                    //output_headers(resp_data.num_headers);
                 } else {
                     printf("[ERROR] HTTP response body read status %i\n", status);
                 }
