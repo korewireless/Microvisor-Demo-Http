@@ -1,4 +1,4 @@
-# Microvisor HTTP Demo 1.0.2
+# Microvisor HTTP Demo 1.0.3
 
 This repo provides a basic demonstration of a user application capable of working with Microvisor’s HTTP communications system calls.
 
@@ -29,6 +29,12 @@ and then:
 ```bash
 cd microvisor-http-demo
 git submodule update --init --recursive
+```
+
+To subsequently update the submodules to their most recent commits, run:
+
+```bash
+git submodule update --remote --recursive
 ```
 
 ## Requirements
