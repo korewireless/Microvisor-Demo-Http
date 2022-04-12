@@ -223,5 +223,5 @@ MvNetworkHandle get_net_handle() {
  *  @brief Network notification ISR.
  */
 void TIM1_BRK_IRQHandler(void) {
-    
+    // Add your own notification processing code here
 }

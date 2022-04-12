@@ -81,10 +81,10 @@ int main(void) {
 
 
 /**
-  * @brief Get the MV clock value.
-  *
-  * @returns The clock value.
-  */
+ * @brief Get the MV clock value.
+ *
+ * @returns The clock value.
+ */
 uint32_t SECURE_SystemCoreClockUpdate() {
     uint32_t clock = 0;
     mvGetHClk(&clock);
@@ -102,10 +102,10 @@ void system_clock_config(void) {
 
 
 /**
-  * @brief Initialize the MCU GPIO.
-  *
-  * Used to flash the Nucleo's USER LED, which is on GPIO Pin PA5.
-  */
+ * @brief Initialize the MCU GPIO.
+ *
+ * Used to flash the Nucleo's USER LED, which is on GPIO Pin PA5.
+ */
 void gpio_init(void) {
     // Enable GPIO port clock
     __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -124,10 +124,10 @@ void gpio_init(void) {
 
 
 /**
-  * @brief Function implementing the LED-flash task thread.
-  *
-  * @param  argument: Not used.
-  */
+ * @brief Function implementing the LED-flash task thread.
+ *
+ * @param  argument: Not used.
+ */
 void start_led_task(void *argument) {
     uint32_t last_tick = 0;
 
@@ -150,10 +150,10 @@ void start_led_task(void *argument) {
 
 
 /**
-  * @brief Function implementing the FreeRTOS HTTP task thread.
-  *
-  * @param  argument: Not used.
-  */
+ * @brief Function implementing the FreeRTOS HTTP task thread.
+ *
+ * @param  argument: Not used.
+*/
 void start_http_task(void *argument) {
     uint32_t ping_count = 1;
     uint32_t kill_time = 0;
@@ -278,7 +278,7 @@ void http_close_channel(void) {
 
 
 /**
- * @brief   Configure the channel Notification Center.
+ * @brief Configure the channel Notification Center.
  */
 void http_channel_center_setup(void) {
     // Clear the notification store
