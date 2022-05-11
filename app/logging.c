@@ -38,7 +38,7 @@ void log_open_channel(void) {
 
     // Configure and open the logging channel
     static volatile uint8_t receive_buffer[16];
-    static volatile uint8_t send_buffer[1024] __attribute__((aligned(512)));
+    static volatile uint8_t send_buffer[1536] __attribute__((aligned(512)));
     char endpoint[] = "log";
     struct MvOpenChannelParams channel_config = {
         .version = 1,

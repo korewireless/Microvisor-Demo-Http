@@ -43,6 +43,7 @@ struct {
  *  doesn't render them immutable at runtime
  */
 volatile bool request_recv = false;
+volatile uint8_t item_number = 1;
 
 // Central store for notification records.
 // Holds one record at a time -- each record is 16 bytes.
@@ -315,8 +316,9 @@ bool http_send_request() {
 
         // Set up the request
         const char verb[] = "GET";
-        const char uri[] = "https://jsonplaceholder.typicode.com/todos/1";
         const char body[] = "";
+        char uri[46] = "";
+        sprintf(uri, "https://jsonplaceholder.typicode.com/todos/%u", item_number);
         struct MvHttpHeader hdrs[] = {};
         struct MvHttpRequest request_config = {
             .method = (uint8_t *)verb,
@@ -329,6 +331,11 @@ bool http_send_request() {
             .body_len = strlen(body),
             .timeout_ms = 10000
         };
+
+        // FROM 1.1.0
+        // Switch the retrieved JSON file
+        item_number++;
+        if (item_number > 9) item_number = 1;
 
         // Issue the request -- and check its status
         enum MvStatus status = mvSendHttpRequest(http_handles.channel, &request_config);
@@ -382,6 +389,9 @@ void http_process_response(void) {
         // the request was successful (status code 200)
         if (resp_data.result == MV_HTTPRESULT_OK) {
             if (resp_data.status_code == 200) {
+                printf("[DEBUG] HTTP response header count: %lu\n", resp_data.num_headers);
+                printf("[DEBUG] HTTP response body length: %lu\n", resp_data.body_length);
+
                 // Set up a buffer that we'll get Microvisor to write
                 // the response body into
                 uint8_t buffer[resp_data.body_length + 1];
@@ -389,8 +399,6 @@ void http_process_response(void) {
                 status = mvReadHttpResponseBody(http_handles.channel, 0, buffer, resp_data.body_length);
                 if (status == MV_STATUS_OKAY) {
                     // Retrieved the body data successfully so log it
-                    printf("[DEBUG] HTTP response header count: %lu\n", resp_data.num_headers);
-                    printf("[DEBUG] HTTP response body length: %lu\n", resp_data.body_length);
                     printf("%s\n", buffer);
                     //output_headers(resp_data.num_headers);
                 } else {
