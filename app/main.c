@@ -1,7 +1,7 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 1.0.3
+ * Version 1.1.0
  * Copyright © 2022, Twilio
  * Licence: Apache 2.0
  *
@@ -17,7 +17,7 @@
 osThreadId_t LEDTask;
 const osThreadAttr_t led_task_attributes = {
     .name = "LEDTask",
-    .stack_size = 512,
+    .stack_size = 1024,
     .priority = (osPriority_t) osPriorityNormal
 };
 
@@ -25,7 +25,7 @@ const osThreadAttr_t led_task_attributes = {
 osThreadId_t HTTPTask;
 const osThreadAttr_t http_task_attributes = {
     .name = "HTTPTask",
-    .stack_size = 1024,
+    .stack_size = 1536,
     .priority = (osPriority_t) osPriorityNormal
 };
 
@@ -254,7 +254,7 @@ bool http_open_channel(void) {
     } else {
         printf("[ERROR] HTTP channel opening failed. Status: %i\n", status);
     }
-    
+
     return false;
 }
 
