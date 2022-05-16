@@ -1,4 +1,4 @@
-# Microvisor HTTP Demo 1.1.0
+# Microvisor HTTP Demo 1.2.0
 
 This repo provides a basic demonstration of a user application capable of working with Microvisor’s HTTP communications system calls.
 
@@ -7,6 +7,8 @@ It is based on the [FreeRTOS](https://freertos.org/) real-time operating system 
 The [ARM CMSIS-RTOS API](https://github.com/ARM-software/CMSIS_5) is used an an intermediary between the application and FreeRTOS to make it easier to swap out the RTOS layer for another.
 
 The application code files can be found in the [app_src/](app_src/) directory. The [ST_Code/](ST_Code/) directory contains required components that are not part of Twilio Microvisor STM32U5 HAL, which this sample accesses as a submodule. The `FreeRTOSConfig.h` and `stm32u5xx_hal_conf.h` configuration files are located in the [config/](config/) directory.
+
+**IMPORTANT** Versions of this repo prior to 1.2.0 include an earlier version of the `deploy.sh` script which is no longer compatible with the Microvisor REST API. Please update. Version 
 
 ## Actions
 
@@ -123,8 +125,7 @@ This will yield JSON which contains a `device` array — your Microvisor Nucleo 
 Build the sample code in the repo directory with:
 
 ```bash
-cmake -S . -B build/
-cmake --build build --clean-first
+./deploy.sh
 ```
 
 ## Deploy the Application
