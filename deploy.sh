@@ -108,7 +108,7 @@ if [[ $do_deploy -eq 1 ]]; then
     else
         # Success... try to assign the app
         echo "Assigning app ${app_sid} to device ${MV_DEVICE_SID}..."
-        update_action=$(curl -X POST "https://microvisor.twilio.com/v1/Devices/${MV_DEVICE_SID}" -u "${TWILIO_API_KEY}:${TWILIO_API_SECRET}" -s -d AppSid="${app_sid}")
+        update_action=$(curl -X POST "https://microvisor.twilio.com/v1/Devices/${MV_DEVICE_SID}" -u "${TWILIO_API_KEY}:${TWILIO_API_SECRET}" -s -d TargetApp="${app_sid}")
         up_date=$(echo "${update_action}" | jq -r '.date_updated')
 
         if [[ "${up_date}" != "null" ]]; then
