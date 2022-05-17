@@ -1,7 +1,7 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 1.2.0
+ * Version 1.2.1
  * Copyright © 2022, Twilio
  * Licence: Apache 2.0
  *
@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <errno.h>
 #include <time.h>
@@ -66,6 +67,8 @@ bool        http_send_request();
 void        http_process_response(void);
 
 void        log_device_info(void);
+void        server_log(char* format_string, ...);
+void        server_error(char* format_string, ...);
 
 void        output_headers(uint32_t n);
 

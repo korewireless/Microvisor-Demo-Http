@@ -7,7 +7,7 @@
 #
 # @author    Tony Smith
 # @copyright 2022, Twilio
-# @version   1.4.0
+# @version   1.4.1
 # @license   MIT
 #
 
@@ -17,6 +17,7 @@ do_build=1
 do_deploy=1
 do_update=1
 zip_path="./build/app/mv-http-demo.zip"
+cmake_path="app/CMakeLists.txt"
 
 # FUNCTIONS
 show_help() {
@@ -55,10 +56,10 @@ update_build_number() {
     ((new_num=old_num+1))
 
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        sed -i "s|BUILD_NUMBER \"${old_num}\"|BUILD_NUMBER \"${new_num}\"|" App/CMakeLists.txt
+        sed -i "s|BUILD_NUMBER \"${old_num}\"|BUILD_NUMBER \"${new_num}\"|" "$cmake_path"
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS requires slightly different syntax from Unix
-        sed -i '' "s|BUILD_NUMBER \"${old_num}\"|BUILD_NUMBER \"${new_num}\"|" App/CMakeLists.txt
+        sed -i '' "s|BUILD_NUMBER \"${old_num}\"|BUILD_NUMBER \"${new_num}\"|" "$cmake_path"
     else
         echo "[ERROR] Unknown OS... build number not incremented"
     fi
@@ -121,6 +122,9 @@ if [[ $do_deploy -eq 1 ]]; then
         fi
     fi
 fi
+
+# Remove null file
+rm -f null.d
 
 # Start logging if requested to do so
 [[ $do_log -eq 1 ]] && stream_log

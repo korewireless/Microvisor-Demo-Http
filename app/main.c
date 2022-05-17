@@ -1,7 +1,7 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 1.2.0
+ * Version 1.2.1
  * Copyright © 2022, Twilio
  * Licence: Apache 2.0
  *
@@ -13,19 +13,19 @@
  *  GLOBALS
  */
 
-// This is the FreeRTOS thread task that flashed the USER LED
+// This is the CMSIS/FreeRTOS thread task that flashed the USER LED
 osThreadId_t LEDTask;
 const osThreadAttr_t led_task_attributes = {
     .name = "LEDTask",
-    .stack_size = 1024,
+    .stack_size = 2048,
     .priority = (osPriority_t) osPriorityNormal
 };
 
-// This is the FreeRTOS thread task that sends HTTP requests
+// This is the CMSIS/FreeRTOS thread task that sends HTTP requests
 osThreadId_t HTTPTask;
 const osThreadAttr_t http_task_attributes = {
     .name = "HTTPTask",
-    .stack_size = 1536,
+    .stack_size = 4096,
     .priority = (osPriority_t) osPriorityNormal
 };
 
@@ -173,7 +173,7 @@ void start_http_task(void *argument) {
         if (tick - send_tick > REQUEST_SEND_PERIOD_MS) {
             // Display the current count
             send_tick = tick;
-            printf("[DEBUG] Ping %lu\n", ping_count++);
+            server_log("Ping %lu", ping_count++);
 
             // No channel open? Try and send the temperature
             if (http_handles.channel == 0 && http_open_channel()) {
@@ -181,7 +181,7 @@ void start_http_task(void *argument) {
                 if (!result) close_channel = true;
                 kill_time = tick;
             } else {
-                printf("[ERROR] Channel handle not zero\n");
+                server_error("Channel handle not zero");
             }
         }
 
@@ -227,7 +227,7 @@ bool http_open_channel(void) {
     //      (ie. so the network handle != 0) well in advance of this being called
     http_handles.network = get_net_handle();
     if (http_handles.network == 0) return false;
-    printf("[DEBUG] Network handle: %lu\n", (uint32_t)http_handles.network);
+    server_log("Network handle: %lu", (uint32_t)http_handles.network);
 
     // Configure the required data channel
     struct MvOpenChannelParams channel_config = {
@@ -250,10 +250,10 @@ bool http_open_channel(void) {
     // and confirm that it has accepted the request
     enum MvStatus status = mvOpenChannel(&channel_config, &http_handles.channel);
     if (status == MV_STATUS_OKAY) {
-        printf("[DEBUG] HTTP channel handle: %lu\n", (uint32_t)http_handles.channel);
+        server_log("HTTP channel handle: %lu", (uint32_t)http_handles.channel);
         return true;
     } else {
-        printf("[ERROR] HTTP channel opening failed. Status: %i\n", status);
+        server_error("HTTP channel opening failed. Status: %i", status);
     }
 
     return false;
@@ -270,7 +270,7 @@ void http_close_channel(void) {
     if (http_handles.channel != 0) {
         enum MvStatus status = mvCloseChannel(&http_handles.channel);
         assert((status == MV_STATUS_OKAY || status == MV_STATUS_CHANNELCLOSED) && "[ERROR] Channel closure");
-        printf("[DEBUG] HTTP channel closed\n");
+        server_log("HTTP channel closed");
     }
 
     // Confirm the channel handle has been invalidated by Microvisor
@@ -300,7 +300,7 @@ void http_channel_center_setup(void) {
     // Start the notification IRQ
     NVIC_ClearPendingIRQ(TIM8_BRK_IRQn);
     NVIC_EnableIRQ(TIM8_BRK_IRQn);
-    printf("[DEBUG] Notification center handle: %lu\n", (uint32_t)http_handles.notification);
+    server_log("Notification center handle: %lu", (uint32_t)http_handles.notification);
 }
 
 
@@ -312,7 +312,7 @@ void http_channel_center_setup(void) {
 bool http_send_request() {
     // Make sure we have a valid channel handle
     if (http_handles.channel != 0) {
-        printf("[DEBUG] Sending HTTP request\n");
+        server_log("Sending HTTP request");
 
         // Set up the request
         const char verb[] = "GET";
@@ -340,12 +340,12 @@ bool http_send_request() {
         // Issue the request -- and check its status
         enum MvStatus status = mvSendHttpRequest(http_handles.channel, &request_config);
         if (status == MV_STATUS_OKAY) {
-            printf("[DEBUG] Request sent to Twilio\n");
+            server_log("Request sent to Twilio");
             return true;
         }
 
         // Report send failure
-        printf("[ERROR] Could not issue request. Status: %i\n", status);
+        server_error("Could not issue request. Status: %i", status);
         return false;
     }
 
@@ -365,7 +365,6 @@ bool http_send_request() {
 void TIM8_BRK_IRQHandler(void) {
     // Get the event type
     enum MvEventType event_kind = http_notification_center->event_type;
-    printf("[DEBUG] Channel notification center IRQ called for event: %u\n", event_kind);
 
     if (event_kind == MV_EVENTTYPE_CHANNELDATAREADABLE) {
         // Flag we need to access received data and to close the HTTP channel
@@ -389,8 +388,8 @@ void http_process_response(void) {
         // the request was successful (status code 200)
         if (resp_data.result == MV_HTTPRESULT_OK) {
             if (resp_data.status_code == 200) {
-                printf("[DEBUG] HTTP response header count: %lu\n", resp_data.num_headers);
-                printf("[DEBUG] HTTP response body length: %lu\n", resp_data.body_length);
+                server_log("HTTP response header count: %lu", resp_data.num_headers);
+                server_log("HTTP response body length: %lu", resp_data.body_length);
 
                 // Set up a buffer that we'll get Microvisor to write
                 // the response body into
@@ -402,13 +401,13 @@ void http_process_response(void) {
                     printf("%s\n", buffer);
                     //output_headers(resp_data.num_headers);
                 } else {
-                    printf("[ERROR] HTTP response body read status %i\n", status);
+                    server_error("HTTP response body read status %i", status);
                 }
             } else {
-                printf("[ERROR] HTTP status code: %lu\n", resp_data.status_code);
+                server_error("HTTP status code: %lu", resp_data.status_code);
             }
         } else {
-            printf("[ERROR] Request failed. Status: %i\n", resp_data.result);;
+            server_error("Request failed. Status: %i", resp_data.result);;
         }
     } else {
         printf("[ERROR] Response data read failed. Status: %i\n", status);
@@ -431,7 +430,7 @@ void output_headers(uint32_t n) {
             if (status == MV_STATUS_OKAY) {
                 printf("%lu. %s\n", i + 1, buffer);
             } else {
-                printf("[ERROR] Could not read header %lu\n", i + 1);
+                server_error("Could not read header %lu", i + 1);
             }
         }
     }
@@ -445,4 +444,38 @@ void log_device_info(void) {
     uint8_t buffer[35] = { 0 };
     mvGetDeviceId(buffer, 34);
     printf("Device: %s\n   App: %s %s\n Build: %i\n", buffer, APP_NAME, APP_VERSION, BUILD_NUM);
+}
+
+
+/**
+ * @brief Issue debug message.
+ *
+ * @param format_string Message string with optional formatting
+ * @param ...           Optional injectable values
+ */
+void server_log(char* format_string, ...) {
+    if (LOG_DEBUG_MESSAGES) {
+        va_list args;
+        char buffer[1024] = "[DEBUG] ";
+        va_start(args, format_string);
+        vsprintf(&buffer[8], format_string, args);
+        va_end(args);
+        printf("%s\n", buffer);
+    }
+}
+
+
+/**
+ * @brief Issue error message.
+ *
+ * @param format_string Message string with optional formatting
+ * @param ...           Optional injectable values
+ */
+void server_error(char* format_string, ...) {
+    va_list args;
+    char buffer[1024] = "[ERROR] ";
+    va_start(args, format_string);
+    vsprintf(&buffer[8], format_string, args);
+    va_end(args);
+    printf("%s\n", buffer);
 }

@@ -2,9 +2,11 @@ cmake_minimum_required(VERSION 3.14)
 
 set(PROJECT_NAME "mv-http-demo")
 
-# Set this variable to 0 to build
-# without remote debugging enabled
-set(ENABLE_REMOTE 1)
+# Set to 0 to build without remote debugging enabled
+set(ENABLE_REMOTE_DEBUGGING 1)
+
+# Set to false to stop '[DEBUG]' messages being logged
+add_compile_definitions(LOG_DEBUG_MESSAGES=true)
 
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain.cmake")
 

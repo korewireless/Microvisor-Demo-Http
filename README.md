@@ -1,6 +1,6 @@
-# Microvisor HTTP Demo 1.2.0
+# Microvisor HTTP Demo 1.2.1
 
-This repo provides a basic demonstration of a user application capable of working with Microvisor’s HTTP communications system calls.
+This repo provides a basic demonstration of a user application capable of working with Microvisor’s HTTP communications system calls. It has not hardware dependencies beyond the Twilio Microvisor Nucleo Development Board.
 
 It is based on the [FreeRTOS](https://freertos.org/) real-time operating system and which will run on the “non-secure” side of Microvisor. FreeRTOS is included as a submodule.
 
@@ -44,7 +44,7 @@ git submodule update --remote --recursive
 This release supports remote debugging. Builds are enabled for remote debugging automatically. Change the value of the line
 
 ```
-set(ENABLE_REMOTE 1)
+set(ENABLE_REMOTE_DEBUGGING 1)
 ```
 
 in the root `CMakeLists.txt` file to `0` to disable this.
@@ -145,7 +145,7 @@ The `--log` flag initiates log-streaming.
 You can start log streaming separately — for example, in a second terminal window — with this command:
 
 ```bash
-twilio microvisor:logs:stream ${MV_DEVICE_SID}
+./deploy.sh -k
 ```
 
 ## Copyright and Licensing

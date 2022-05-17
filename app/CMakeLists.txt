@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 # Set application data
 set(APP "Microvisor HTTP Demo")
-set(VERSION_NUMBER "1.2.0")
+set(VERSION_NUMBER "1.2.1")
 set(BUILD_NUMBER "1")
 
 message("Building ${APP} ${VERSION_NUMBER} build ${BUILD_NUMBER}")
@@ -37,15 +37,13 @@ add_custom_command(OUTPUT EXTRA_FILES
 # Bundle with remote debugging key
 add_custom_command(OUTPUT REMOTE_DEBUG
     DEPENDS ${PROJECT_NAME}
-    COMMAND python3 ${CMAKE_SOURCE_DIR}/twilio-microvisor-tools/bundler-py/bundler.py "${PROJECT_NAME}.elf" --debug-auth-pubkey debug_auth_pub_key.pem "${PROJECT_NAME}.zip"
-    COMMAND rm -f ${CMAKE_SOURCE_DIR}/null.d
+    COMMAND python3 "${CMAKE_SOURCE_DIR}/twilio-microvisor-tools/bundler-py/bundler.py" "${PROJECT_NAME}.elf" --debug-auth-pubkey debug_auth_pub_key.pem "${PROJECT_NAME}.zip"
 )
 
 # Bundle without remote debugging key
 add_custom_command(OUTPUT NO_REMOTE_DEBUG
     DEPENDS ${PROJECT_NAME}
-    COMMAND python3 ${CMAKE_SOURCE_DIR}/twilio-microvisor-tools/bundler-py/bundler.py "${PROJECT_NAME}.elf" "${PROJECT_NAME}.zip"
-    COMMAND rm -f ${CMAKE_SOURCE_DIR}/null.d
+    COMMAND python3 "${CMAKE_SOURCE_DIR}/twilio-microvisor-tools/bundler-py/bundler.py" "${PROJECT_NAME}.elf" "${PROJECT_NAME}.zip"
 )
 
 # Generate remote debugging auth keys
@@ -59,12 +57,12 @@ find_program(OPENSSL "openssl")
 if(NOT OPENSSL)
     # No OpenSSL so can't do debug builds
     message(WARNING "OpenSSL could not be found... cannot enable remote debugging")
-    set(ENABLE_REMOTE 0)
+    set(ENABLE_REMOTE_DEBUGGING 0)
 endif()
 
 # Based on build setting (see project CMakeLists.txt),
 # select which addtional command sets to run
-if(DEFINED ENABLE_REMOTE AND ${ENABLE_REMOTE} EQUAL 1)
+if(DEFINED ENABLE_REMOTE_DEBUGGING AND ${ENABLE_REMOTE_DEBUGGING} EQUAL 1)
     message("Bundling ${APP} for remote debugging")
     add_custom_target(extras ALL DEPENDS GEN_KEYS EXTRA_FILES REMOTE_DEBUG)
 else()
