@@ -148,6 +148,12 @@ You can start log streaming separately — for example, in a second terminal win
 ./deploy.sh -k
 ```
 
+For more information, run
+
+```bash
+./deploy.sh --help
+```
+
 ## Copyright and Licensing
 
 The sample code and Microvisor SDK is © 2022, Twilio, Inc. It is licensed under the terms of the [Apache 2.0 License](./LICENSE).
