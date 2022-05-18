@@ -120,15 +120,7 @@ curl https://microvisor.twilio.com/v1/Devices \
 
 This will yield JSON which contains a `device` array — your Microvisor Nucleo Board will be in that array. Use the value of its `sid` field for your `MV_DEVICE_SID` value.
 
-## Build the Code
-
-Build the sample code in the repo directory with:
-
-```bash
-./deploy.sh
-```
-
-## Deploy the Application
+## Build and Deploy the Application
 
 Run:
 
@@ -136,7 +128,7 @@ Run:
 ./deploy.sh --log
 ```
 
-This will upload the build and stage it for deployment to your device. If you encounter errors, please check your stored Twilio credentials.
+This will compile, bundle and upload the code, and stage it for deployment to your device. If you encounter errors, please check your stored Twilio credentials.
 
 The `--log` flag initiates log-streaming.
 
