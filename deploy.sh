@@ -36,7 +36,7 @@ show_help() {
 }
 
 stream_log() {
-    echo "Logging from ${MV_DEVICE_SID}..."
+    echo -e "\nLogging from ${MV_DEVICE_SID}..."
     twilio microvisor:logs:stream "${MV_DEVICE_SID}"
 }
 
