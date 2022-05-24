@@ -7,7 +7,7 @@
 #
 # @author    Tony Smith
 # @copyright 2022, Twilio
-# @version   1.4.1
+# @version   1.5.0
 # @license   MIT
 #
 
@@ -18,16 +18,20 @@ do_deploy=1
 do_update=1
 zip_path="./build/app/mv-http-demo.zip"
 cmake_path="app/CMakeLists.txt"
+private_key_path=NONE
+public_key_path=NONE
 
 # FUNCTIONS
 show_help() {
     echo -e "Usage:\n"
     echo -e "  deploy [-l] [-h] /optional/path/to/Microvisor/app/bunde.zip\n"
     echo -e "Options:\n"
-    echo "  -l / --log      After deployment, start log streaming. Default: no logging"
-    echo "  -k              Start log streaming immediately; do not build or deploy"
-    echo "  -d              Deploy without a build"
-    echo "  -h / --help     Show this help screen"
+    echo "  --log / -l           After deployment, start log streaming. Default: no logging"
+    echo "  --public-key {path}  /path/to/remote/debugging/public/key.pem"
+    echo "  --private-key {path} /path/to/remote/debugging/private/key.pem"
+    echo "  -k                   Start log streaming immediately; do not build or deploy"
+    echo "  -d                   Deploy without a build"
+    echo "  -h / --help          Show this help screen"
     echo
 }
 
@@ -37,11 +41,14 @@ stream_log() {
 }
 
 build_app() {
-    echo "Building app..."
-    if [[ ! -d ./build ]]; then
+    if [[ "${public_key_path}" != "NONE" ]]; then
+        cmake -S . -B build -D "RD_PUBLIC_KEYPATH:STRING=${public_key_path}"
+    else
         cmake -S . -B build
     fi
+    
     cmake --build build --clean-first > /dev/null
+    
     if [[ $? -eq 0 ]]; then
         echo "App built"
     else
@@ -52,24 +59,41 @@ build_app() {
 
 update_build_number() {
     build_val=$(grep 'set(BUILD_NUMBER "' App/CMakeLists.txt)
-    old_num=$(echo "$build_val" | cut -d '"' -s -f 2)
+    old_num=$(echo "${build_val}" | cut -d '"' -s -f 2)
     ((new_num=old_num+1))
 
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        sed -i "s|BUILD_NUMBER \"${old_num}\"|BUILD_NUMBER \"${new_num}\"|" "$cmake_path"
+        sed -i "s|BUILD_NUMBER \"${old_num}\"|BUILD_NUMBER \"${new_num}\"|" "${cmake_path}"
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS requires slightly different syntax from Unix
-        sed -i '' "s|BUILD_NUMBER \"${old_num}\"|BUILD_NUMBER \"${new_num}\"|" "$cmake_path"
+        sed -i '' "s|BUILD_NUMBER \"${old_num}\"|BUILD_NUMBER \"${new_num}\"|" "${cmake_path}"
     else
         echo "[ERROR] Unknown OS... build number not incremented"
     fi
 }
 
 # RUNTIME START
+arg_is_value=0
 for arg in "$@"; do
     check_arg=${arg,,}
+    if [[ $arg_is_value -gt 0 ]]; then
+        case "$arg_is_value" in
+            1) private_key_path="$arg" ; echo "Remote Debugging private key: $private_key_path" ;;
+            2) public_key_path="$arg"  ; echo "Remote Debugging public key: $public_key_path"   ;;
+            *) echo "[Error] Unknown argument" exit 1 ;;
+        esac
+        arg_is_value=0
+        continue
+    fi
+
     if [[ "$check_arg" = "--log" || "$check_arg" = "-l" ]]; then
         do_log=1
+    elif [[ "$check_arg" = "--private-key" ]]; then
+        arg_is_value=1
+        continue
+    elif [[ "$check_arg" = "--public-key" ]]; then
+        arg_is_value=2
+        continue
     elif [[ "$check_arg" = "-k" ]]; then
         do_log=1
         do_deploy=0
@@ -125,6 +149,14 @@ fi
 
 # Remove null file
 rm -f null.d
+
+# Dump remote debugging command if we can
+echo -e "\nUse the following command to initiate remote debugging:"
+if [[ "${private_key_path}" != "NONE" ]]; then
+    echo "twilio microvisor:debug ${MV_DEVICE_SID} '${private_key_path}'"
+else
+    echo "twilio microvisor:debug ${MV_DEVICE_SID} '$(pwd)/build/app/debug_auth_priv_key.pem'"
+fi
 
 # Start logging if requested to do so
 [[ $do_log -eq 1 ]] && stream_log

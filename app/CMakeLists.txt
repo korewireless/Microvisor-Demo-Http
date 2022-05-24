@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 # Set application data
 set(APP "Microvisor HTTP Demo")
-set(VERSION_NUMBER "1.2.1")
+set(VERSION_NUMBER "1.3.0")
 set(BUILD_NUMBER "1")
 
 message("Building ${APP} ${VERSION_NUMBER} build ${BUILD_NUMBER}")
@@ -24,6 +24,14 @@ target_link_libraries(${PROJECT_NAME} LINK_PUBLIC
     ST_Code
     twilio-microvisor-hal-stm32u5
     FreeRTOS)
+    
+# Check for (and prepare to use) passed-in path to public key
+if(DEFINED RD_PUBLIC_KEYPATH AND (NOT ${RD_PUBLIC_KEYPATH} EQUAL "NONE"))
+    set(PUB_KEY_PATH "${RD_PUBLIC_KEYPATH}")
+    set(NO_KEY_GEN 1)
+else()
+    set(NO_KEY_GEN 0)
+endif()
 
 # Optional informational and additional format generation, including Bundle output
 add_custom_command(OUTPUT EXTRA_FILES
@@ -37,7 +45,7 @@ add_custom_command(OUTPUT EXTRA_FILES
 # Bundle with remote debugging key
 add_custom_command(OUTPUT REMOTE_DEBUG
     DEPENDS ${PROJECT_NAME}
-    COMMAND python3 "${CMAKE_SOURCE_DIR}/twilio-microvisor-tools/bundler-py/bundler.py" "${PROJECT_NAME}.elf" --debug-auth-pubkey debug_auth_pub_key.pem "${PROJECT_NAME}.zip"
+    COMMAND python3 "${CMAKE_SOURCE_DIR}/twilio-microvisor-tools/bundler-py/bundler.py" "${PROJECT_NAME}.elf" --debug-auth-pubkey "${PUB_KEY_PATH}" "${PROJECT_NAME}.zip"
 )
 
 # Bundle without remote debugging key
@@ -65,6 +73,14 @@ endif()
 if(DEFINED ENABLE_REMOTE_DEBUGGING AND ${ENABLE_REMOTE_DEBUGGING} EQUAL 1)
     message("Bundling ${APP} for remote debugging")
     add_custom_target(extras ALL DEPENDS GEN_KEYS EXTRA_FILES REMOTE_DEBUG)
+    
+    # Don't generate keys if a public key has been passed in
+    # via the deploy script --public-key option
+    if(DEFINED NO_KEY_GEN AND ${NO_KEY_GEN} EQUAL 1)
+        add_custom_target(extras ALL DEPENDS EXTRA_FILES REMOTE_DEBUG)
+    else()
+        add_custom_target(extras ALL DEPENDS GEN_KEYS EXTRA_FILES REMOTE_DEBUG)
+    endif()
 else()
     message("Bundling ${APP}")
     add_custom_target(extras ALL DEPENDS EXTRA_FILES NO_REMOTE_DEBUG)
