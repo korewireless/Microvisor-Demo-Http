@@ -72,7 +72,6 @@ endif()
 # select which addtional command sets to run
 if(DEFINED ENABLE_REMOTE_DEBUGGING AND ${ENABLE_REMOTE_DEBUGGING} EQUAL 1)
     message("Bundling ${APP} for remote debugging")
-    add_custom_target(extras ALL DEPENDS GEN_KEYS EXTRA_FILES REMOTE_DEBUG)
     
     # Don't generate keys if a public key has been passed in
     # via the deploy script --public-key option
