@@ -16,11 +16,10 @@ do_log=0
 do_build=1
 do_deploy=1
 do_update=1
-private_key_path=NONE
 public_key_path=NONE
-zip_path="./build/app/mv-http-demo.zip"
+private_key_path="app/debug_auth_priv_key.pem"
+zip_path="app/mv-http-demo.zip"
 cmake_path="app/CMakeLists.txt"
-
 
 # FUNCTIONS
 show_help() {
@@ -123,8 +122,8 @@ if [[ ${do_deploy} -eq 1 ]]; then
     fi
 
     # Try to upload the bundle
-    echo "Uploading ${zip_path}..."
-    upload_action=$(curl -X POST https://microvisor-upload.twilio.com/v1/Apps -H "Content-Type: multipart/form-data" -u "${TWILIO_API_KEY}:${TWILIO_API_SECRET}" -s -F File=@"${zip_path}")
+    echo "Uploading build/${zip_path}..."
+    upload_action=$(curl -X POST https://microvisor-upload.twilio.com/v1/Apps -H "Content-Type: multipart/form-data" -u "${TWILIO_API_KEY}:${TWILIO_API_SECRET}" -s -F File=@"build/${zip_path}")
 
     app_sid=$(echo "${upload_action}" | jq -r '.sid')
 
@@ -153,10 +152,10 @@ rm -f null.d
 
 # Dump remote debugging command if we can
 echo -e "\nUse the following command to initiate remote debugging:"
-if [[ "${private_key_path}" != "NONE" ]]; then
+if [[ "${public_key_path}" != "NONE" ]]; then
     echo "twilio microvisor:debug ${MV_DEVICE_SID} '${private_key_path}'"
 else
-    echo "twilio microvisor:debug ${MV_DEVICE_SID} '$(pwd)/build/app/debug_auth_priv_key.pem'"
+    echo "twilio microvisor:debug ${MV_DEVICE_SID} '$(pwd)/build/${private_key_path}'"
 fi
 
 # Start logging if requested to do so
