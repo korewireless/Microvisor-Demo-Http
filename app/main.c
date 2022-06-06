@@ -133,7 +133,7 @@ void start_led_task(void *argument) {
     uint32_t last_tick = 0;
 
     // The task's main loop
-    while (true) {
+    while (1) {
         // Periodically update the display and flash the USER LED
         // Get the ms timer value
         uint32_t tick = HAL_GetTick();
@@ -168,7 +168,7 @@ void start_http_task(void *argument) {
     http_channel_center_setup();
 
     // Run the thread's main loop
-    while (true) {
+    while (1) {
         uint32_t tick = HAL_GetTick();
         if (tick - send_tick > REQUEST_SEND_PERIOD_MS) {
             // Display the current count
