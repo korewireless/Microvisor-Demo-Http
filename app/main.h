@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <time.h>
+#include <assert.h>
 
 // Microvisor includes
 #include "stm32u5xx_hal.h"

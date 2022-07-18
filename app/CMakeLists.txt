@@ -24,7 +24,7 @@ target_link_libraries(${PROJECT_NAME} LINK_PUBLIC
     ST_Code
     twilio-microvisor-hal-stm32u5
     FreeRTOS)
-    
+
 # Check for (and prepare to use) passed-in path to public key
 if(DEFINED RD_PUBLIC_KEYPATH AND (NOT ${RD_PUBLIC_KEYPATH} EQUAL "NONE"))
     set(PUB_KEY_PATH "${RD_PUBLIC_KEYPATH}")
@@ -72,7 +72,7 @@ endif()
 # select which addtional command sets to run
 if(DEFINED ENABLE_REMOTE_DEBUGGING AND ${ENABLE_REMOTE_DEBUGGING} EQUAL 1)
     message("Bundling ${APP} for remote debugging")
-    
+
     # Don't generate keys if a public key has been passed in
     # via the deploy script --public-key option
     if(DEFINED NO_KEY_GEN AND ${NO_KEY_GEN} EQUAL 1)
