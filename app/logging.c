@@ -15,11 +15,15 @@ struct {
     MvNotificationHandle notification;
     MvNetworkHandle      network;
     MvChannelHandle      channel;
-} log_handles = { 0, 0, 0 };
+    uint32_t             logging;
+} log_handles = { 0, 0, 0, 0 };
 
 // Central store for notification records. Holds one record at
 // a time -- each record is 16 bytes in size.
 static volatile struct MvNotification log_notification_buffer[16];
+
+const uint32_t log_buffer_size = 1024;
+static uint8_t log_buffer[1024] __attribute__((aligned(512))) = {0} ;
 
 
 /**
@@ -31,6 +35,7 @@ static volatile struct MvNotification log_notification_buffer[16];
 void log_open_channel(void) {
     // Configure the logging notification center
     log_channel_center_setup();
+    logging_setup();
 
     // Connect to the network
     // NOTE This connection spans logging and HTTP comms
@@ -258,8 +263,12 @@ void log_open_network() {
 /**
  *  @brief Provide the current network handle.
  */
-MvNetworkHandle get_net_handle() {
+MvNetworkHandle get_net_handle(void) {
     return log_handles.network;
+}
+
+uint32_t get_log_handle(void) {
+    return log_handles.logging;
 }
 
 
@@ -268,4 +277,20 @@ MvNetworkHandle get_net_handle() {
  */
 void TIM1_BRK_IRQHandler(void) {
     // Add your own notification processing code here
+}
+
+
+
+
+
+void logging_setup(void) {
+    if (log_handles.logging == 0) {
+        // Initialse logging with a system call
+        enum MvStatus status = mvServerLoggingInit(log_buffer, log_buffer_size);
+        if (status == MV_STATUS_OKAY) {
+            log_handles.logging = 0xFFFF;
+        }
+        
+        assert(status == MV_STATUS_OKAY);
+    }
 }

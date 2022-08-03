@@ -398,7 +398,7 @@ void http_process_response(void) {
                 status = mvReadHttpResponseBody(http_handles.channel, 0, buffer, resp_data.body_length);
                 if (status == MV_STATUS_OKAY) {
                     // Retrieved the body data successfully so log it
-                    printf("%s\n", buffer);
+                    server_log("\n%s", buffer);
                     //output_headers(resp_data.num_headers);
                 } else {
                     server_error("HTTP response body read status %i", status);
@@ -410,7 +410,7 @@ void http_process_response(void) {
             server_error("Request failed. Status: %i", resp_data.result);;
         }
     } else {
-        printf("[ERROR] Response data read failed. Status: %i\n", status);
+        server_error("[ERROR] Response data read failed. Status: %i\n", status);
     }
 }
 
@@ -428,7 +428,7 @@ void output_headers(uint32_t n) {
             memset((void *)buffer, 0x00, 256);
             status = mvReadHttpResponseHeader(http_handles.channel, i, buffer, 255);
             if (status == MV_STATUS_OKAY) {
-                printf("%lu. %s\n", i + 1, buffer);
+                server_log("%lu. %s\n", i + 1, buffer);
             } else {
                 server_error("Could not read header %lu", i + 1);
             }
@@ -443,7 +443,7 @@ void output_headers(uint32_t n) {
 void log_device_info(void) {
     uint8_t buffer[35] = { 0 };
     mvGetDeviceId(buffer, 34);
-    printf("Device: %s\n   App: %s %s\n Build: %i\n", buffer, APP_NAME, APP_VERSION, BUILD_NUM);
+    server_log("Device: %s\n   App: %s %s\n Build: %i", buffer, APP_NAME, APP_VERSION, BUILD_NUM);
 }
 
 
@@ -455,12 +455,14 @@ void log_device_info(void) {
  */
 void server_log(char* format_string, ...) {
     if (LOG_DEBUG_MESSAGES) {
+        if (get_net_handle() == 0) log_open_channel();
         va_list args;
-        char buffer[512] = "[DEBUG] ";
+        char buffer[1024] = {0};
+        sprintf(buffer, "[DEBUG] ");
         va_start(args, format_string);
-        vsprintf(&buffer[8], format_string, args);
+        vsnprintf(&buffer[8], 1016, format_string, args);
         va_end(args);
-        printf("%s\n", buffer);
+        mvServerLog((const uint8_t*)buffer, (uint16_t)strlen(buffer));
     }
 }
 
@@ -472,10 +474,12 @@ void server_log(char* format_string, ...) {
  * @param ...           Optional injectable values
  */
 void server_error(char* format_string, ...) {
+    if (get_net_handle() == 0) log_open_channel();
     va_list args;
-    char buffer[512] = "[ERROR] ";
+    char buffer[1024] = {0};
+    sprintf(buffer, "[ERROR] ");
     va_start(args, format_string);
-    vsprintf(&buffer[8], format_string, args);
+    vsnprintf(&buffer[8], 1016, format_string, args);
     va_end(args);
-    printf("%s\n", buffer);
+    mvServerLog((const uint8_t*)buffer, 124);
 }

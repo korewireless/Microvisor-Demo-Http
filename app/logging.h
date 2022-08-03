@@ -29,9 +29,10 @@ extern "C" {
 void            log_open_channel(void);
 void            log_close_channel(void);
 void            log_channel_center_setup(void);
+void            logging_setup(void);
 void            log_open_network(void);
-MvNetworkHandle get_net_handle();
-
+MvNetworkHandle get_net_handle(void);
+uint32_t        get_log_handle(void);
 
 #ifdef __cplusplus
 }
