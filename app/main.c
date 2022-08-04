@@ -398,7 +398,7 @@ void http_process_response(void) {
                 status = mvReadHttpResponseBody(http_handles.channel, 0, buffer, resp_data.body_length);
                 if (status == MV_STATUS_OKAY) {
                     // Retrieved the body data successfully so log it
-                    server_log("\n%s", buffer);
+                    server_log("Message JSON:\n%s", buffer);
                     //output_headers(resp_data.num_headers);
                 } else {
                     server_error("HTTP response body read status %i", status);
@@ -481,5 +481,5 @@ void server_error(char* format_string, ...) {
     va_start(args, format_string);
     vsnprintf(&buffer[8], 1016, format_string, args);
     va_end(args);
-    mvServerLog((const uint8_t*)buffer, 124);
+    mvServerLog((const uint8_t*)buffer, (uint16_t)strlen(buffer));
 }
