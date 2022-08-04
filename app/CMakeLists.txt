@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.14)
 
 # Set application data
 set(APP "Microvisor HTTP Demo")
-set(VERSION_NUMBER "1.3.4")
-set(BUILD_NUMBER "25")
+set(VERSION_NUMBER "2.0.0")
+set(BUILD_NUMBER "0")
 
 message("Building ${APP} ${VERSION_NUMBER} build ${BUILD_NUMBER}")
 

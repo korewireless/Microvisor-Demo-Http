@@ -1,7 +1,7 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 1.3.4
+ * Version 2.0.0
  * Copyright © 2022, Twilio
  * Licence: Apache 2.0
  *
@@ -61,15 +61,13 @@ void        gpio_init(void);
 void        start_led_task(void *argument);
 void        start_http_task(void *argument);
 
-void        http_channel_center_setup(void);
+void        http_notification_center_setup(void);
 bool        http_open_channel(void);
 void        http_close_channel(void);
 bool        http_send_request();
 void        http_process_response(void);
 
 void        log_device_info(void);
-void        server_log(char* format_string, ...);
-void        server_error(char* format_string, ...);
 
 void        output_headers(uint32_t n);
 

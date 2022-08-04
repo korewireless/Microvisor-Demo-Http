@@ -1,7 +1,7 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 1.3.3
+ * Version 2.0.0
  * Copyright © 2022, Twilio
  * Licence: Apache 2.0
  *
@@ -165,7 +165,7 @@ void start_http_task(void *argument) {
     log_device_info();
 
     // Set up channel notifications
-    http_channel_center_setup();
+    http_notification_center_setup();
 
     // Run the thread's main loop
     while (1) {
@@ -281,7 +281,7 @@ void http_close_channel(void) {
 /**
  * @brief Configure the channel Notification Center.
  */
-void http_channel_center_setup(void) {
+void http_notification_center_setup(void) {
     // Clear the notification store
     memset((void *)http_notification_center, 0xFF, sizeof(http_notification_center));
 
@@ -410,7 +410,7 @@ void http_process_response(void) {
             server_error("Request failed. Status: %i", resp_data.result);;
         }
     } else {
-        server_error("[ERROR] Response data read failed. Status: %i\n", status);
+        server_error("[ERROR] Response data read failed. Status: %i", status);
     }
 }
 
@@ -428,7 +428,7 @@ void output_headers(uint32_t n) {
             memset((void *)buffer, 0x00, 256);
             status = mvReadHttpResponseHeader(http_handles.channel, i, buffer, 255);
             if (status == MV_STATUS_OKAY) {
-                server_log("%lu. %s\n", i + 1, buffer);
+                server_log("%lu. %s", i + 1, buffer);
             } else {
                 server_error("Could not read header %lu", i + 1);
             }
@@ -444,42 +444,4 @@ void log_device_info(void) {
     uint8_t buffer[35] = { 0 };
     mvGetDeviceId(buffer, 34);
     server_log("Device: %s\n   App: %s %s\n Build: %i", buffer, APP_NAME, APP_VERSION, BUILD_NUM);
-}
-
-
-/**
- * @brief Issue debug message.
- *
- * @param format_string Message string with optional formatting
- * @param ...           Optional injectable values
- */
-void server_log(char* format_string, ...) {
-    if (LOG_DEBUG_MESSAGES) {
-        if (get_net_handle() == 0) log_open_channel();
-        va_list args;
-        char buffer[1024] = {0};
-        sprintf(buffer, "[DEBUG] ");
-        va_start(args, format_string);
-        vsnprintf(&buffer[8], 1016, format_string, args);
-        va_end(args);
-        mvServerLog((const uint8_t*)buffer, (uint16_t)strlen(buffer));
-    }
-}
-
-
-/**
- * @brief Issue error message.
- *
- * @param format_string Message string with optional formatting
- * @param ...           Optional injectable values
- */
-void server_error(char* format_string, ...) {
-    if (get_net_handle() == 0) log_open_channel();
-    va_list args;
-    char buffer[1024] = {0};
-    sprintf(buffer, "[ERROR] ");
-    va_start(args, format_string);
-    vsnprintf(&buffer[8], 1016, format_string, args);
-    va_end(args);
-    mvServerLog((const uint8_t*)buffer, (uint16_t)strlen(buffer));
 }
