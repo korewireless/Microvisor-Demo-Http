@@ -10,7 +10,7 @@ The application code files can be found in the [app_src/](app_src/) directory. T
 
 ## Release Notes
 
-Version 2.0.0 replaces `printf()`-based application logging with Microvisor’s application logging system calls.
+Version 2.0.0 replaces earlier `printf()`-based application logging with Microvisor’s application logging system calls.
 
 Versions prior to 1.2.0 include a version of the `deploy.sh` script which is no longer compatible with the Microvisor REST API.
 
@@ -37,11 +37,15 @@ cd microvisor-http-demo
 git submodule update --init --recursive
 ```
 
-To subsequently update the submodules to their most recent commits, run:
+## Repo Updates
+
+When the repo is updated, and you pull the changes, you should also always update dependency submodules. To do so, run:
 
 ```bash
 git submodule update --remote --recursive
 ```
+
+We recommend following this by deleting your `build` directory.
 
 ## Requirements
 
