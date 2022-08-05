@@ -7,7 +7,7 @@
 #
 # @author    Tony Smith
 # @copyright 2022, Twilio
-# @version   1.5.3
+# @version   1.5.4
 # @license   MIT
 #
 
@@ -28,6 +28,10 @@ public_key_path=NONE
 # the case. You can pass in alternative target for the build product
 # eg. './deploy.sh build_alt/app/my_app.zip'
 
+# ERROR HANDLING
+set -eE
+trap '[ERROR] An unknown error occured' ERR
+
 # FUNCTIONS
 show_help() {
     echo -e "Usage:\n"
@@ -47,7 +51,14 @@ stream_log() {
     twilio microvisor:logs:stream "${MV_DEVICE_SID}"
 }
 
+show_error_and_exit() {
+    echo "[ERROR] $1"
+    exit 1
+}
+
 build_app() {
+    which cmake2 || show_error_and_exit "Cmake not installed... exiting"
+    
     if [[ "${public_key_path}" != "NONE" ]]; then
         cmake -S . -B build -D "RD_PUBLIC_KEYPATH:STRING=${public_key_path}"
     else
@@ -57,8 +68,7 @@ build_app() {
     if cmake --build build --clean-first > /dev/null ; then
         echo "App built"
     else
-        echo "[ERROR] Could not build the app... exiting"
-        exit 1
+        show_error_and_exit "Could not build the app... exiting"
     fi
 }
 
@@ -80,6 +90,7 @@ update_build_number() {
 # RUNTIME START
 arg_is_value=0
 for arg in "$@"; do
+    # Make arg lowercase
     check_arg=${arg,,}
     if [[ ${arg_is_value} -gt 0 ]]; then
         case "${arg_is_value}" in
@@ -122,8 +133,7 @@ if [[ ${do_deploy} -eq 1 ]]; then
     # Check we have what looks like a bundle
     extension="${zip_path##*.}"
     if [[ "${extension}" != "zip" ]]; then
-        echo "[ERROR] ${zip_path} does not indicate a .zip file"
-        exit 1
+        show_error_and_exit "${zip_path} does not indicate a .zip file"
     fi
 
     # Try to upload the bundle
@@ -133,8 +143,7 @@ if [[ ${do_deploy} -eq 1 ]]; then
     app_sid=$(echo "${upload_action}" | jq -r '.sid')
 
     if [[ -z "${app_sid}" ]]; then
-        echo "[ERROR] Could not upload app"
-        exit 1
+        show_error_and_exit "Could not upload app"
     else
         # Success... try to assign the app
         echo "Assigning app ${app_sid} to device ${MV_DEVICE_SID}..."
