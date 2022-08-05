@@ -28,10 +28,6 @@ public_key_path=NONE
 # the case. You can pass in alternative target for the build product
 # eg. './deploy.sh build_alt/app/my_app.zip'
 
-# ERROR HANDLING
-set -eE
-trap '[ERROR] An unknown error occured' ERR
-
 # FUNCTIONS
 show_help() {
     echo -e "Usage:\n"
@@ -57,7 +53,7 @@ show_error_and_exit() {
 }
 
 build_app() {
-    which cmake2 || show_error_and_exit "Cmake not installed... exiting"
+    check=$(which cmake) || show_error_and_exit "Cmake not installed... exiting"
     
     if [[ "${public_key_path}" != "NONE" ]]; then
         cmake -S . -B build -D "RD_PUBLIC_KEYPATH:STRING=${public_key_path}"
@@ -88,6 +84,10 @@ update_build_number() {
 }
 
 # RUNTIME START
+# Check we're running on Bash version 4+
+bv=$(/usr/bin/env bash --version | grep 'GNU bash' | awk {'print $4'} | cut -d. -f1)
+[[ ${bv} -lt 4 ]] && show_error_and_exit "This script requires Bash 4+"
+
 arg_is_value=0
 for arg in "$@"; do
     # Make arg lowercase
