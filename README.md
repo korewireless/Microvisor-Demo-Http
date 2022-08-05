@@ -103,7 +103,7 @@ export MV_DEVICE_SID=UVxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 You can get the first two from your Twilio Console [account dashboard](https://console.twilio.com/).
 
-To generate API keys and secrets, visit [**Account > API keys & tokens**](https://twilio.com/console/project/api-keys/).
+To generate API keys and secrets, visit [**Account > API keys & tokens**](https://twilio.com/console/project/api-keys/) in the Console.
 
 Restart your terminal and enter the following command:
 
