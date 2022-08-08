@@ -96,8 +96,8 @@ Running the Twilio CLI and the project's [deploy script](./deploy.sh) — for up
 ```bash
 export TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 export TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-export TWILIO_API_KEY=SKxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-export TWILIO_API_SECRET=YKxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+export TWILIO_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+export TWILIO_API_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 export MV_DEVICE_SID=UVxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
