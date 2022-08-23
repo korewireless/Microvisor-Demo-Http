@@ -77,10 +77,16 @@ pip3 install cryptography protobuf~=3.0
 
 ### Twilio CLI
 
-Install the Twilio CLI (required to view streamed logs):
+Install the Twilio CLI. This is required to view streamed logs and for remote debugging. You need version 4.0.1 or above.
+
+**Note** If you have already installed the Twilio CLI using *npm*, we recommend removing it and then reinstalling as outlined below. Remove the old version with `npm remove -g twilio-cli`.
 
 ```bash
-curl -o - https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
+wget -qO- https://twilio-cli-prod.s3.amazonaws.com/twilio_pub.asc | sudo apt-key add -
+sudo touch /etc/apt/sources.list.d/twilio.list
+echo 'deb https://twilio-cli-prod.s3.amazonaws.com/apt/ /' | sudo tee /etc/apt/sources.list.d/twilio.list
+sudo apt update
+sudo apt install -y twilio
 ```
 
 Close your terminal window or tab, and open a new one. Now run:
