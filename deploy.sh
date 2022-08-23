@@ -46,7 +46,7 @@ show_help() {
     echo "  --output / -o {mode}  Log output mode: \'text\` or \`json\`"
     echo "  --public-key {path}   /path/to/remote/debugging/public/key.pem"
     echo "  --private-key {path}  /path/to/remote/debugging/private/key.pem"
-    echo "  -d                    Deploy without a build"
+    echo "  -d / --deploy         Deploy without a build"
     echo "  --log-only            Start log streaming immediately; do not build or deploy"
     echo "  -h / --help           Show this help screen"
     echo
@@ -74,7 +74,7 @@ check_prereqs() {
     #2: required utilities
     prqs=(jq cmake curl twilio)
     for prq in "${prqs[@]}"; do
-        check=$(which ${prq}) || show_error_and_exit "Required utility ${prq} not installed"
+        check=$(which "${prq}") || show_error_and_exit "Required utility ${prq} not installed"
     done
 
     #3: credentials set
@@ -82,8 +82,8 @@ check_prereqs() {
     
     #4: Microvisor plugin version
     result=$(twilio plugins | grep 'microvisor' | awk {'print $2'})
-    minor=$(echo $result | cut -d. -f2)
-    patch=$(echo $result | cut -d. -f3)
+    minor=$(echo "$result" | cut -d. -f2)
+    patch=$(echo "$result" | cut -d. -f3)
     [[ ${minor} -lt ${mvplg_minor_min} ]] && show_error_and_exit "Microvisor plugin 0.${mvplg_minor_min}.${mvplg_patch_min} or above required"
     [[ ${minor} -eq ${mvplg_minor_min} && ${patch} -lt ${mvplg_patch_min} ]] && show_error_and_exit "Microvisor plugin 0.${mvplg_minor_min}.${mvplg_patch_min} or above required"
 }
@@ -159,7 +159,7 @@ for arg in "$@"; do
         do_log=1
         do_deploy=0
         do_build=0
-    elif [[ "${check_arg}" = "-d" ]]; then
+        elif [[ "${check_arg}" = "--deploy" || "${check_arg}" = "-d" ]]; then
         do_build=0
     elif [[ "${check_arg}" = "--help" || "${check_arg}" = "-h" ]]; then
         show_help
@@ -201,15 +201,7 @@ if [[ ${do_deploy} -eq 1 ]]; then
     else
         # Success... try to assign the app
         echo "Assigning app ${app_sid} to device ${MV_DEVICE_SID}..."
-        update_action=$(curl -X POST "https://microvisor.twilio.com/v1/Devices/${MV_DEVICE_SID}" -u "${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}" -s -d TargetApp="${app_sid}")
-        up_date=$(echo "${update_action}" | jq -r '.date_updated')
-
-        if [[ "${up_date}" != "null" ]]; then
-            echo "Updated device ${MV_DEVICE_SID} @ ${up_date}"
-        else
-            echo "[ERROR] Could not assign app ${app_sid} to device ${MV_DEVICE_SID}"
-            echo "Response from server:"
-            echo "${update_action}"
+        if ! assign_action=$(twilio api:microvisor:v1:devices:update --sid=${MV_DEVICE_SID} --target-app=${app_sid}); then
             exit 1
         fi
     fi
