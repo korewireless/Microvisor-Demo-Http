@@ -26,7 +26,7 @@ do_gen_keys=0
 public_key_path=NONE
 output_mode=text
 mvplg_minor_min="3"
-mvplg_patch_min="1"
+mvplg_patch_min="2"
 
 # NOTE
 # This script the build directory is called 'build' and exists within
