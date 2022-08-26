@@ -410,7 +410,7 @@ void http_process_response(void) {
             server_error("Request failed. Status: %i", resp_data.result);;
         }
     } else {
-        server_error("[ERROR] Response data read failed. Status: %i", status);
+        server_error("Response data read failed. Status: %i", status);
     }
 }
 
