@@ -36,7 +36,7 @@ mvplg_patch_min="2"
 
 # FROM 1.6.0 -- Trap ctrl-c
 stty -echoctl
-trap 'echo Done' SIGINT
+trap 'echo End of Line' SIGINT
 
 # FUNCTIONS
 show_help() {
@@ -50,7 +50,7 @@ show_help() {
     echo "  --gen-keys            Generate remote debugging keys"
     echo "  --deploy / -d         Deploy without a build"
     echo "  --log-only            Start log streaming immediately; do not build or deploy"
-    echo "  -h / --help           Show this help screen"
+    echo "  --help / -h           Show this help screen"
     echo
 }
 
