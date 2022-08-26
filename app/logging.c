@@ -116,7 +116,7 @@ void net_notification_center_setup() {
  */
 void log_service_setup(void) {
     if (net_handles.log == 0) {
-        // Initialse logging with the standard system call
+        // Initialize logging with the standard system call
         enum MvStatus status = mvServerLoggingInit(log_buffer, log_buffer_size);
         
         // Set a mock handle as a proxy for a 'logging enabled' flag
