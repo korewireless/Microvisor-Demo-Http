@@ -7,7 +7,7 @@
 #
 # @author    Tony Smith
 # @copyright 2022, Twilio
-# @version   1.6.0
+# @version   1.7.0
 # @license   MIT
 #
 
@@ -22,10 +22,11 @@ do_log=0
 do_build=1
 do_deploy=1
 do_update=1
+do_gen_keys=0
 public_key_path=NONE
 output_mode=text
 mvplg_minor_min="3"
-mvplg_patch_min="0"
+mvplg_patch_min="3"
 
 # NOTE
 # This script the build directory is called 'build' and exists within
@@ -35,7 +36,7 @@ mvplg_patch_min="0"
 
 # FROM 1.6.0 -- Trap ctrl-c
 stty -echoctl
-trap 'echo Done' SIGINT
+trap 'echo End of Line' SIGINT
 
 # FUNCTIONS
 show_help() {
@@ -46,9 +47,10 @@ show_help() {
     echo "  --output / -o {mode}  Log output mode: \'text\` or \`json\`"
     echo "  --public-key {path}   /path/to/remote/debugging/public/key.pem"
     echo "  --private-key {path}  /path/to/remote/debugging/private/key.pem"
+    echo "  --gen-keys            Generate remote debugging keys"
     echo "  --deploy / -d         Deploy without a build"
     echo "  --log-only            Start log streaming immediately; do not build or deploy"
-    echo "  -h / --help           Show this help screen"
+    echo "  --help / -h           Show this help screen"
     echo
 }
 
@@ -58,6 +60,14 @@ stream_log() {
         twilio microvisor:logs:stream "${MV_DEVICE_SID}" --output=json | jq
     else
         twilio microvisor:logs:stream "${MV_DEVICE_SID}"
+    fi
+}
+
+set_keys() {
+    echo -e "Generating Remote Debugging keys..."
+    if twilio microvisor:debug:generate_keypair --debug-auth-privkey="${private_key_path}" --debug-auth-pubkey="${public_key_path}" ; then
+        echo "Private key written to ${private_key_path}"
+        echo " Public key written to ${public_key_path}"
     fi
 }
 
@@ -79,7 +89,7 @@ check_prereqs() {
 
     #3: credentials set
     [[ -z ${TWILIO_ACCOUNT_SID} || -z ${TWILIO_AUTH_TOKEN} ]] && show_error_and_exit "Twilio credentials not set as environment variables"
-    
+
     #4: Microvisor plugin version
     result=$(twilio plugins | grep 'microvisor' | awk {'print $2'})
     minor=$(echo "$result" | cut -d. -f2)
@@ -159,7 +169,9 @@ for arg in "$@"; do
         do_log=1
         do_deploy=0
         do_build=0
-        elif [[ "${check_arg}" = "--deploy" || "${check_arg}" = "-d" ]]; then
+    elif [[ "${check_arg}" = "--gen-keys" ]]; then
+        do_gen_key=1
+    elif [[ "${check_arg}" = "--deploy" || "${check_arg}" = "-d" ]]; then
         do_build=0
     elif [[ "${check_arg}" = "--help" || "${check_arg}" = "-h" ]]; then
         show_help
@@ -170,6 +182,17 @@ for arg in "$@"; do
         zip_path="${arg}"
     fi
 done
+
+# FROM 1.7.0 -- generate keys if required
+if [[ ${do_gen_keys} -eq 1 ]]; then
+    if [[ "${public_key_path}" = "NONE" ]]; then
+        # Public key path not specified, so use the default
+        public_key_path="build/${app_dir}/debug_auth_pub_key.pem"
+    fi
+
+    # Generate keys
+    set_keys()
+fi
 
 # FROM 1.6.0 -- check output mode
 if [[ ${output_mode} != "text" ]]; then
@@ -192,8 +215,7 @@ if [[ ${do_deploy} -eq 1 ]]; then
 
     # Try to upload the bundle
     echo "Uploading ${zip_path}..."
-    upload_action=$(curl -X POST https://microvisor-upload.twilio.com/v1/Apps -H "Content-Type: multipart/form-data" -u "${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}" -s -F File=@"${zip_path}")
-
+    upload_action=$(twilio api:microvisor:v1:apps:create "${zip_path}" -o=json)
     app_sid=$(echo "${upload_action}" | jq -r '.sid')
 
     if [[ -z "${app_sid}" || "${app_sid}" == "null" ]]; then

@@ -28,9 +28,6 @@ target_link_libraries(${PROJECT_NAME} LINK_PUBLIC
 # Check for (and prepare to use) passed-in path to public key
 if(DEFINED RD_PUBLIC_KEYPATH AND (NOT ${RD_PUBLIC_KEYPATH} EQUAL "NONE"))
     set(PUB_KEY_PATH "${RD_PUBLIC_KEYPATH}")
-    set(NO_KEY_GEN 1)
-else()
-    set(NO_KEY_GEN 0)
 endif()
 
 # Optional informational and additional format generation, including Bundle output
@@ -54,32 +51,11 @@ add_custom_command(OUTPUT NO_REMOTE_DEBUG
     COMMAND python3 "${CMAKE_SOURCE_DIR}/twilio-microvisor-tools/bundler-py/bundler.py" "${PROJECT_NAME}.elf" "${PROJECT_NAME}.zip"
 )
 
-# Generate remote debugging auth keys
-add_custom_command(OUTPUT GEN_KEYS
-    COMMAND openssl ecparam -name prime256v1 -genkey -noout -out debug_auth_priv_key.pem 2>/dev/null
-    COMMAND openssl ec -in debug_auth_priv_key.pem -pubout -out debug_auth_pub_key.pem 2>/dev/null
-)
-
-# Prepare for remote debugging
-find_program(OPENSSL "openssl")
-if(NOT OPENSSL)
-    # No OpenSSL so can't do debug builds
-    message(WARNING "OpenSSL could not be found... cannot enable remote debugging")
-    set(ENABLE_REMOTE_DEBUGGING 0)
-endif()
-
 # Based on build setting (see project CMakeLists.txt),
 # select which additional command sets to run
 if(DEFINED ENABLE_REMOTE_DEBUGGING AND ${ENABLE_REMOTE_DEBUGGING} EQUAL 1)
     message("Bundling ${APP} for remote debugging")
-
-    # Don't generate keys if a public key has been passed in
-    # via the deploy script --public-key option
-    if(DEFINED NO_KEY_GEN AND ${NO_KEY_GEN} EQUAL 1)
-        add_custom_target(extras ALL DEPENDS EXTRA_FILES REMOTE_DEBUG)
-    else()
-        add_custom_target(extras ALL DEPENDS GEN_KEYS EXTRA_FILES REMOTE_DEBUG)
-    endif()
+    add_custom_target(extras ALL DEPENDS EXTRA_FILES REMOTE_DEBUG)
 else()
     message("Bundling ${APP}")
     add_custom_target(extras ALL DEPENDS EXTRA_FILES NO_REMOTE_DEBUG)
