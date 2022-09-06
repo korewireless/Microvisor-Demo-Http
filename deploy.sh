@@ -26,7 +26,7 @@ do_gen_keys=0
 public_key_path=NONE
 output_mode=text
 mvplg_minor_min="3"
-mvplg_patch_min="2"
+mvplg_patch_min="3"
 
 # NOTE
 # This script the build directory is called 'build' and exists within
@@ -215,8 +215,7 @@ if [[ ${do_deploy} -eq 1 ]]; then
 
     # Try to upload the bundle
     echo "Uploading ${zip_path}..."
-    upload_action=$(curl -X POST https://microvisor-upload.twilio.com/v1/Apps -H "Content-Type: multipart/form-data" -u "${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}" -s -F File=@"${zip_path}")
-
+    upload_action=$(twilio api:microvisor:v1:apps:create "${zip_path}" -o=json)
     app_sid=$(echo "${upload_action}" | jq -r '.sid')
 
     if [[ -z "${app_sid}" || "${app_sid}" == "null" ]]; then
