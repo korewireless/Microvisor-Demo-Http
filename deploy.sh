@@ -215,7 +215,7 @@ if [[ ${do_deploy} -eq 1 ]]; then
 
     # Try to upload the bundle
     echo "Uploading ${zip_path}..."
-    upload_action=$(twilio api:microvisor:v1:apps:create "${zip_path}" -o=json)
+    upload_action=$(twilio microvisor:apps:create "${zip_path}" -o=json)
     app_sid=$(echo "${upload_action}" | jq -r '.sid')
 
     if [[ -z "${app_sid}" || "${app_sid}" == "null" ]]; then
