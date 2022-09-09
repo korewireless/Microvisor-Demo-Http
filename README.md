@@ -141,7 +141,11 @@ For more information, run
 ./deploy.sh --help
 ```
 
-## Remote debugging
+## UART Logging
+
+Version 2.0.1 adds optional logging over UART on pin PD5 — pin 43 in bank CN11 on the Microvisor Nucleo Development Board. To use this mode, which is intended as an alternative to application logging, typically when a device is disconnected, connect a 3V3 FTDI USB-to-Serial adapter cable’s RX pin to PD5, and a GND pin to any Nucleo GND pin. Whether you do this or not, the application will continue to log via the Internet.
+
+## Remote Debugging
 
 This release supports remote debugging, and builds are enabled for remote debugging automatically. Change the value of the line
 
