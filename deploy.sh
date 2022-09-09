@@ -15,15 +15,15 @@
 app_dir=app
 app_name=mv-http-demo.zip
 #------------^ APP SPECIFIC ^------------
-private_key_path="build/${app_dir}/debug_auth_priv_key.pem"
 cmake_path="${app_dir}/CMakeLists.txt"
 zip_path="build/${app_dir}/${app_name}"
+private_key_path=NONE
+public_key_path=NONE
 do_log=0
 do_build=1
 do_deploy=1
 do_update=1
 do_gen_keys=0
-public_key_path=NONE
 output_mode=text
 mvplg_minor_min="3"
 mvplg_patch_min="3"
@@ -44,12 +44,14 @@ show_help() {
     echo -e "  ./deploy.sh /optional/path/to/Microvisor/app/bunde.zip\n"
     echo -e "Options:\n"
     echo "  --log / -l            After deployment, start log streaming. Default: no logging"
-    echo "  --output / -o {mode}  Log output mode: \'text\` or \`json\`"
-    echo "  --public-key {path}   /path/to/remote/debugging/public/key.pem"
-    echo "  --private-key {path}  /path/to/remote/debugging/private/key.pem"
-    echo "  --gen-keys            Generate remote debugging keys"
+    echo "  --genkeys             Generate remote debugging keys"
+    echo "  --publickey {path}    /path/to/remote/debugging/public/key.pem"
+    echo "                        Must be a pre-generated file if you do not include --gen-keys"
+    echo "  --privatekey {path}   /path/to/remote/debugging/private/key.pem"
+    echo "                        Must be a pre-generated file if you do not include --gen-keys"
     echo "  --deploy / -d         Deploy without a build"
-    echo "  --log-only            Start log streaming immediately; do not build or deploy"
+    echo "  --logonly             Start log streaming immediately; do not build or deploy"
+    echo "  --output / -o {mode}  Log output mode: \'text\` or \`json\`"
     echo "  --help / -h           Show this help screen"
     echo
 }
@@ -65,9 +67,21 @@ stream_log() {
 
 set_keys() {
     echo -e "Generating Remote Debugging keys..."
+    # Check for passed directories
+    if [[ -d "${private_key_path}" ]]; then
+        private_key_path="${private_key_path}/debug_auth_prv_key.pem"
+    fi
+    
+    if [[ -d "${public_key_path}" ]]; then
+        public_key_path="${public_key_path}/debug_auth_pub_key.pem"
+    fi
+
+    # Generate the keys using the Twilio CLI Microvisor plugin
     if twilio microvisor:debug:generate_keypair --debug-auth-privkey="${private_key_path}" --debug-auth-pubkey="${public_key_path}" ; then
         echo "Private key written to ${private_key_path}"
         echo " Public key written to ${public_key_path}"
+    else
+        show_error_and_exit "Could not generate remote debugging keys"
     fi
 }
 
@@ -104,7 +118,7 @@ build_app() {
     else
         cmake -S . -B build
     fi
-
+    
     if cmake --build build --clean-first > /dev/null ; then
         echo "App built"
     else
@@ -142,8 +156,8 @@ for arg in "$@"; do
             show_error_and_exit "Missing value for ${last_arg}"
         fi
         case "${arg_is_value}" in
-            1) private_key_path="${arg}" ; echo "Remote Debugging private key: ${private_key_path}" ;;
-            2) public_key_path="${arg}"  ; echo "Remote Debugging public key: ${public_key_path}"   ;;
+            1) private_key_path="${arg}" ;;
+            2) public_key_path="${arg}"  ;;
             3) output_mode="${check_arg}" ;;
             *) echo "[Error] Unknown argument" exit 1 ;;
         esac
@@ -153,11 +167,11 @@ for arg in "$@"; do
 
     if [[ "${check_arg}" = "--log" || "${check_arg}" = "-l" ]]; then
         do_log=1
-    elif [[ "${check_arg}" = "--private-key" ]]; then
+    elif [[ "${check_arg}" = "--privatekey" ]]; then
         arg_is_value=1
         last_arg=${arg}
         continue
-    elif [[ "${check_arg}" = "--public-key" ]]; then
+    elif [[ "${check_arg}" = "--publickey" ]]; then
         arg_is_value=2
         last_arg=${arg}
         continue
@@ -165,12 +179,12 @@ for arg in "$@"; do
         arg_is_value=3
         last_arg=${arg}
         continue
-    elif [[ "${check_arg}" = "--log-only" ]]; then
+    elif [[ "${check_arg}" = "--logonly" ]]; then
         do_log=1
         do_deploy=0
         do_build=0
-    elif [[ "${check_arg}" = "--gen-keys" ]]; then
-        do_gen_key=1
+    elif [[ "${check_arg}" = "--genkeys" ]]; then
+        do_gen_keys=1
     elif [[ "${check_arg}" = "--deploy" || "${check_arg}" = "-d" ]]; then
         do_build=0
     elif [[ "${check_arg}" = "--help" || "${check_arg}" = "-h" ]]; then
@@ -189,9 +203,27 @@ if [[ ${do_gen_keys} -eq 1 ]]; then
         # Public key path not specified, so use the default
         public_key_path="build/${app_dir}/debug_auth_pub_key.pem"
     fi
+    
+    if [[ "${private_key_path}" = "NONE" ]]; then
+        # Private key path not specified, so use the default
+        private_key_path="build/${app_dir}/debug_auth_prv_key.pem"
+    fi
+    
+    # Create the build directory so we can save keys there
+    if [[ ! -e build ]]; then
+        mkdir -p "build/${app_dir}" || show_error_and_exit "Could not create the build directory"
+    fi
 
-    # Generate keys
-    set_keys()
+    # Generate the keys
+    set_keys
+else
+    # User didn't ask to generate keys - did they pass in a public key path?
+    if [[ "${public_key_path}" != "NONE" ]]; then
+        # Check key path
+        if [[ ! -f "${public_key_path}" ]]; then
+            show_error_and_exit "Public key cannot be found at ${public_key_path}"
+        fi
+    fi
 fi
 
 # FROM 1.6.0 -- check output mode
