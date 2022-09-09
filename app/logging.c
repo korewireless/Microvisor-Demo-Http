@@ -21,8 +21,13 @@ struct {
 // a time -- each record is 16 bytes in size.
 static volatile struct MvNotification net_notification_buffer[16];
 
+// Entities for Microvisor application logging
 const uint32_t log_buffer_size = 4096;
 static uint8_t log_buffer[4096] __attribute__((aligned(512))) = {0} ;
+
+// Entities for local serial logging
+// Declred in `uart_logging.c`
+extern UART_HandleTypeDef uart;
 
 
 /**
@@ -38,6 +43,11 @@ void log_start(void) {
     // Connect to the network
     // NOTE This connection spans logging and HTTP comms
     net_open_network();
+    
+    // Establish UART logging
+    if (ENABLE_UART_DEBUGGING) {
+        UART_init();
+    }
 }
 
 
@@ -197,6 +207,13 @@ void do_log(bool is_err, char* format_string, va_list args) {
     
     // Output the message using the system call
     mvServerLog((const uint8_t*)buffer, (uint16_t)strlen(buffer));
+    
+    // Do we output via UART too?
+    if (ENABLE_UART_DEBUGGING) {
+        // Add NEWLINE to the message and output to UART
+        sprintf(&buffer[strlen(buffer)], "\n");
+        UART_output((uint8_t*)buffer, strlen(buffer));
+    }
 }
 
 

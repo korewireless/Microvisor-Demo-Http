@@ -30,6 +30,7 @@
 
 // App includes
 #include "logging.h"
+#include "uart_logging.h"
 
 
 #ifdef __cplusplus
