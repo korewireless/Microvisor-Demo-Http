@@ -13,10 +13,10 @@
 
 # GLOBALS
 app_dir=app
-app_name=mv-http-demo.elf
+app_name=mv-http-demo.bin
 #------------^ APP SPECIFIC ^------------
 cmake_path="${app_dir}/CMakeLists.txt"
-elf_path="build/${app_dir}/${app_name}"
+bin_path="build/${app_dir}/${app_name}"
 private_key_path=NONE
 public_key_path=NONE
 do_log=0
@@ -41,7 +41,7 @@ trap 'echo End of Line' SIGINT
 # FUNCTIONS
 show_help() {
     echo -e "Usage:\n"
-    echo -e "  ./deploy.sh /optional/path/to/Microvisor/app.elf\n"
+    echo -e "  ./deploy.sh /optional/path/to/Microvisor/app.bin\n"
     echo -e "Options:\n"
     echo "  --log / -l            After deployment, start log streaming. Default: no logging"
     echo "  --genkeys             Generate remote debugging keys"
@@ -191,7 +191,7 @@ for arg in "$@"; do
     elif [[ "${arg:0:1}" = "-" ]]; then
         show_error_and_exit "Unknown command: ${arg}"
     else
-        elf_path="${arg}"
+        bin_path="${arg}"
     fi
 done
 
@@ -237,27 +237,21 @@ if [[ ${do_build} -eq 1 ]]; then
 fi
 
 if [[ ${do_deploy} -eq 1 ]]; then
-    # FROM 1.8.0 -- Bundle the .elf with the MV Plugin
-    # Check we have what looks like a .elf
-    extension="${elf_path##*.}"
-    if [[ "${extension}" != "elf" ]]; then
-        show_error_and_exit "${elf_path} does not indicate a .elf file"
+    # FROM 1.8.0 -- Bundle the .bin with the MV Plugin
+    # Check we have what looks like a .bin
+    extension="${bin_path##*.}"
+    if [[ "${extension}" != "bin" ]]; then
+        show_error_and_exit "${bin_path} does not indicate a .bin file"
     fi
     
-    # Bundle the .elf
-    zip_path="${elf_path%%.*}.zip"
+    # Bundle the .bin
+    zip_path="${bin_path%%.*}.zip"
     if [[ "${public_key_path}" != "NONE" ]]; then
-        echo "*** ${public_key_path}"
-        if ! twilio microvisor:apps:bundle "${elf_path}" "${zip_path}" --debug-auth-pubkey "${public_key_path}" -l debug 2>&1 ; then
-            echo "${elf_path}"
-            echo "${zip_path}"
+        if ! twilio microvisor:apps:bundle "${bin_path}" "${zip_path}" --debug-auth-pubkey "${public_key_path}" 2>&1 ; then
             exit 1
         fi
     else
-         echo '####'
-         if ! twilio microvisor:apps:bundle "${elf_path}" "${zip_path}" -l debug 2>&1 ; then
-            echo "${elf_path}"
-            echo "${zip_path}"
+        if ! twilio microvisor:apps:bundle "${bin_path}" "${zip_path}" 2>&1 ; then
             exit 1
         fi
     fi

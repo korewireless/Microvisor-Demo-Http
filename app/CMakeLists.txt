@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 # Set application data
 set(APP "Microvisor HTTP Demo")
 set(VERSION_NUMBER "2.0.3")
-set(BUILD_NUMBER "0")
+set(BUILD_NUMBER "14")
 
 message("Building ${APP} ${VERSION_NUMBER} build ${BUILD_NUMBER}")
 
@@ -28,10 +28,11 @@ target_link_libraries(${PROJECT_NAME} LINK_PUBLIC
 
 # Optional informational and additional format generation
 add_custom_command(OUTPUT EXTRA_FILES DEPENDS ${PROJECT_NAME}
-    COMMAND cp "${PROJECT_NAME}" "${PROJECT_NAME}.elf"
-    COMMAND ${CMAKE_SIZE} --format=berkeley "${PROJECT_NAME}"
+    COMMAND mv "${PROJECT_NAME}" "${PROJECT_NAME}.elf"
+    COMMAND ${CMAKE_SIZE} --format=berkeley "${PROJECT_NAME}.elf"
     COMMAND ${CMAKE_OBJDUMP} -h -S "${PROJECT_NAME}.elf" > "${PROJECT_NAME}.list"
-    COMMAND ${CMAKE_OBJCOPY} -O binary "${PROJECT_NAME}.elf" "${PROJECT_NAME}.bin"
+    COMMAND ${CMAKE_OBJCOPY} --output-target=ihex "${PROJECT_NAME}.elf" "${PROJECT_NAME}.hex"
+    COMMAND ${CMAKE_OBJCOPY} --input-target=ihex --output-target=binary --gap-fill=0xff "${PROJECT_NAME}.hex" "${PROJECT_NAME}.bin"
 )
 
 # Prepare the additional files
