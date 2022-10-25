@@ -1,7 +1,7 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 2.0.3
+ * Version 2.0.4
  * Copyright © 2022, Twilio
  * Licence: Apache 2.0
  *
@@ -17,9 +17,9 @@ struct {
     uint32_t             log;
 } net_handles = { 0, 0, 0 };
 
-// Central store for notification records. Holds one record at
-// a time -- each record is 16 bytes in size.
-static volatile struct MvNotification net_notification_buffer[16];
+// Central store for network management notification records.
+// Holds four records at a time -- each record is 16 bytes in size.
+static volatile struct MvNotification net_notification_buffer[4];
 
 // Entities for Microvisor application logging
 const uint32_t log_buffer_size = 4096;
