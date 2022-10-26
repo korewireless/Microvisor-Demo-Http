@@ -58,7 +58,7 @@ struct {
  *  so we mark them as `volatile` to ensure compiler optimization
  *  doesn't render them immutable at runtime
  */
-volatile bool request_recv = false;
+volatile bool received_request = false;
 volatile uint8_t item_number = 1;
 
 // Central store for HTTP request management notification records.
@@ -176,7 +176,7 @@ static void start_http_task(void *argument) {
     uint32_t ping_count = 1;
     uint32_t kill_time = 0;
     uint32_t send_tick = 0;
-    bool close_channel = false;
+    bool do_close_channel = false;
 
     // Get the Device ID and build number and log them
     log_device_info();
@@ -195,7 +195,7 @@ static void start_http_task(void *argument) {
             // No channel open?
             if (http_handles.channel == 0 && http_open_channel()) {
                 bool result = http_send_request();
-                if (!result) close_channel = true;
+                if (!result) do_close_channel = true;
                 kill_time = tick;
             } else {
                 server_error("Channel handle not zero");
@@ -203,21 +203,21 @@ static void start_http_task(void *argument) {
         }
 
         // Process a request's response if indicated by the ISR
-        if (request_recv) {
+        if (received_request) {
             http_process_response();
         }
 
         // Use 'kill_time' to force-close an open HTTP channel
         // if it's been left open too long
         if (kill_time > 0 && tick - kill_time > CHANNEL_KILL_PERIOD_MS) {
-            close_channel = true;
+            do_close_channel = true;
         }
 
         // If we've received a response in an interrupt handler,
         // we can close the HTTP channel for the time being
-        if (request_recv || close_channel) {
-            close_channel = false;
-            request_recv = false;
+        if (received_request || do_close_channel) {
+            do_close_channel = false;
+            received_request = false;
             kill_time = 0;
             http_close_channel();
         }
@@ -386,7 +386,7 @@ void TIM8_BRK_IRQHandler(void) {
         // Flag we need to access received data and to close the HTTP channel
         // when we're back in the main loop. This lets us exit the ISR quickly.
         // We should not make Microvisor System Calls in the ISR.
-        request_recv = true;
+        received_request = true;
 
         // Point to the next record to be written
         current_notification_index++;
@@ -452,7 +452,7 @@ static void output_headers(uint32_t n) {
             memset((void *)buffer, 0x00, 256);
             status = mvReadHttpResponseHeader(http_handles.channel, i, buffer, 255);
             if (status == MV_STATUS_OKAY) {
-                server_log("%lu. %s", i + 1, buffer);
+                server_log("Header %lu. %s", i + 1, buffer);
             } else {
                 server_error("Could not read header %lu", i + 1);
             }
@@ -467,5 +467,5 @@ static void output_headers(uint32_t n) {
 static void log_device_info(void) {
     uint8_t buffer[35] = { 0 };
     mvGetDeviceId(buffer, 34);
-    server_log("Device: %s\n   App: %s %s\n Build: %i", buffer, APP_NAME, APP_VERSION, BUILD_NUM);
+    server_log("\nDevice: %s\n   App: %s %s\n Build: %i", buffer, APP_NAME, APP_VERSION, BUILD_NUM);
 }

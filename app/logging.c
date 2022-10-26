@@ -30,7 +30,7 @@ struct {
 } net_handles = { 0, 0, 0 };
 
 // Central store for network management notification records.
-// Holds four records at a time -- each record is 16 bytes in size.
+// Holds eight records at a time -- each record is 16 bytes in size.
 static volatile struct MvNotification net_notification_buffer[8] __attribute__((aligned(8)));
 
 // Entities for Microvisor application logging
