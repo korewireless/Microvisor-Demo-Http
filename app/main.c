@@ -9,6 +9,22 @@
 #include "main.h"
 
 
+/*
+ * STATIC PROTOTYPES
+ */
+static void system_clock_config(void);
+static void gpio_init(void);
+static void start_led_task(void *argument);
+static void start_http_task(void *argument);
+static void http_notification_center_setup(void);
+static bool http_open_channel(void);
+static void http_close_channel(void);
+static bool http_send_request();
+static void http_process_response(void);
+static void log_device_info(void);
+static void output_headers(uint32_t n);
+
+
 /**
  *  GLOBALS
  */
@@ -46,16 +62,16 @@ volatile bool request_recv = false;
 volatile uint8_t item_number = 1;
 
 // Central store for HTTP request management notification records.
-// Holds four records at a time -- each record is 16 bytes in size.
-volatile struct MvNotification http_notification_center[4];
-volatile struct MvNotification* notification_ptr = http_notification_center;
+// Holds HTTP_NT_BUFFER_SIZE_R records at a time -- each record is 16 bytes in size.
+volatile struct MvNotification http_notification_center[HTTP_NT_BUFFER_SIZE_R] __attribute__((aligned(8)));
+volatile uint32_t current_notification_index = 0;
 
 
 /**
  *  @brief The application entry point.
  */
 int main(void) {
-    // Reset of all peripherals, Initializes the Flash interface and the Systick.
+    // Reset of all peripherals, Initializes the Flash interface and the sys tick.
     HAL_Init();
 
     // Configure the system clock
@@ -85,7 +101,7 @@ int main(void) {
 /**
  * @brief Get the MV clock value.
  *
- * @returns The clock value.
+ * @retval The clock value.
  */
 uint32_t SECURE_SystemCoreClockUpdate() {
     uint32_t clock = 0;
@@ -97,7 +113,7 @@ uint32_t SECURE_SystemCoreClockUpdate() {
 /**
   * @brief System clock configuration.
   */
-void system_clock_config(void) {
+static void system_clock_config(void) {
     SystemCoreClockUpdate();
     HAL_InitTick(TICK_INT_PRIORITY);
 }
@@ -108,7 +124,7 @@ void system_clock_config(void) {
  *
  * Used to flash the Nucleo's USER LED, which is on GPIO Pin PA5.
  */
-void gpio_init(void) {
+static void gpio_init(void) {
     // Enable GPIO port clock
     __HAL_RCC_GPIOA_CLK_ENABLE();
 
@@ -130,7 +146,7 @@ void gpio_init(void) {
  *
  * @param  argument: Not used.
  */
-void start_led_task(void *argument) {
+static void start_led_task(void *argument) {
     uint32_t last_tick = 0;
 
     // The task's main loop
@@ -156,7 +172,7 @@ void start_led_task(void *argument) {
  *
  * @param  argument: Not used.
 */
-void start_http_task(void *argument) {
+static void start_http_task(void *argument) {
     uint32_t ping_count = 1;
     uint32_t kill_time = 0;
     uint32_t send_tick = 0;
@@ -176,7 +192,7 @@ void start_http_task(void *argument) {
             send_tick = tick;
             server_log("Ping %lu", ping_count++);
 
-            // No channel open? Try and send the temperature
+            // No channel open?
             if (http_handles.channel == 0 && http_open_channel()) {
                 bool result = http_send_request();
                 if (!result) close_channel = true;
@@ -217,7 +233,7 @@ void start_http_task(void *argument) {
  *
  *  @retval `true` if the channel is open, otherwise `false`.
  */
-bool http_open_channel(void) {
+static bool http_open_channel(void) {
     // Set up the HTTP channel's multi-use send and receive buffers
     static volatile uint8_t http_rx_buffer[HTTP_RX_BUFFER_SIZE_B] __attribute__((aligned(512)));
     static volatile uint8_t http_tx_buffer[HTTP_TX_BUFFER_SIZE_B] __attribute__((aligned(512)));
@@ -264,7 +280,7 @@ bool http_open_channel(void) {
 /**
  *  @brief Close the currently open HTTP channel.
  */
-void http_close_channel(void) {
+static void http_close_channel(void) {
     // If we have a valid channel handle -- ie. it is non-zero --
     // then ask Microvisor to close it and confirm acceptance of
     // the closure request.
@@ -282,9 +298,9 @@ void http_close_channel(void) {
 /**
  * @brief Configure the channel Notification Center.
  */
-void http_notification_center_setup(void) {
+static void http_notification_center_setup(void) {
     // Clear the notification store
-    memset((void *)http_notification_center, 0xFF, sizeof(http_notification_center));
+    memset((void *)http_notification_center, 0x00, sizeof(http_notification_center));
 
     // Configure a notification center for network-centric notifications
     static struct MvNotificationSetup http_notification_setup = {
@@ -308,9 +324,9 @@ void http_notification_center_setup(void) {
 /**
  * @brief Send a stock HTTP request.
  *
- * @returns `true` if the request was accepted by Microvisor, otherwise `false`
+ * @retval `true` if the request was accepted by Microvisor, otherwise `false`
  */
-bool http_send_request() {
+static bool http_send_request() {
     // Make sure we have a valid channel handle
     if (http_handles.channel != 0) {
         server_log("Sending HTTP request");
@@ -364,14 +380,21 @@ bool http_send_request() {
  *  and extract HTTP response data when it is available.
  */
 void TIM8_BRK_IRQHandler(void) {
-    // Get the event type
-    enum MvEventType event_kind = http_notification_center->event_type;
-
-    if (event_kind == MV_EVENTTYPE_CHANNELDATAREADABLE) {
+    // Check for a suitable event: readable data in the channel
+    volatile struct MvNotification notification = http_notification_center[current_notification_index];
+    if (notification.event_type == MV_EVENTTYPE_CHANNELDATAREADABLE) {
         // Flag we need to access received data and to close the HTTP channel
         // when we're back in the main loop. This lets us exit the ISR quickly.
         // We should not make Microvisor System Calls in the ISR.
         request_recv = true;
+
+        // Point to the next record to be written
+        current_notification_index++;
+        if (current_notification_index == HTTP_NT_BUFFER_SIZE_R) current_notification_index = 0;
+
+        // Clear the current notifications event
+        // See https://www.twilio.com/docs/iot/microvisor/microvisor-notifications#buffer-overruns
+        notification.event_type = 0;
     }
 }
 
@@ -379,7 +402,7 @@ void TIM8_BRK_IRQHandler(void) {
 /**
  * @brief Process HTTP response data
  */
-void http_process_response(void) {
+static void http_process_response(void) {
     // We have received data via the active HTTP channel so establish
     // an `MvHttpResponseData` record to hold response metadata
     static struct MvHttpResponseData resp_data;
@@ -400,7 +423,7 @@ void http_process_response(void) {
                 if (status == MV_STATUS_OKAY) {
                     // Retrieved the body data successfully so log it
                     server_log("Message JSON:\n%s", buffer);
-                    //output_headers(resp_data.num_headers);
+                    output_headers(resp_data.num_headers > MAX_HEADERS_OUTPUT ? MAX_HEADERS_OUTPUT : resp_data.num_headers);
                 } else {
                     server_error("HTTP response body read status %i", status);
                 }
@@ -421,7 +444,7 @@ void http_process_response(void) {
  *
  * @param n: The number of headers to list.
  */
-void output_headers(uint32_t n) {
+static void output_headers(uint32_t n) {
     if (n > 0) {
         enum MvStatus status = MV_STATUS_OKAY;
         uint8_t buffer[256];
@@ -441,7 +464,7 @@ void output_headers(uint32_t n) {
 /**
  * @brief Show basic device info.
  */
-void log_device_info(void) {
+static void log_device_info(void) {
     uint8_t buffer[35] = { 0 };
     mvGetDeviceId(buffer, 34);
     server_log("Device: %s\n   App: %s %s\n Build: %i", buffer, APP_NAME, APP_VERSION, BUILD_NUM);
