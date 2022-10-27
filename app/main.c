@@ -25,8 +25,8 @@ static void log_device_info(void);
 static void output_headers(uint32_t n);
 
 
-/**
- *  GLOBALS
+/*
+ * GLOBALS
  */
 
 // This is the CMSIS/FreeRTOS thread task that flashed the USER LED
@@ -389,8 +389,7 @@ void TIM8_BRK_IRQHandler(void) {
         received_request = true;
 
         // Point to the next record to be written
-        current_notification_index++;
-        if (current_notification_index == HTTP_NT_BUFFER_SIZE_R) current_notification_index = 0;
+        current_notification_index = (current_notification_index + 1) % HTTP_NT_BUFFER_SIZE_R;
 
         // Clear the current notifications event
         // See https://www.twilio.com/docs/iot/microvisor/microvisor-notifications#buffer-overruns
