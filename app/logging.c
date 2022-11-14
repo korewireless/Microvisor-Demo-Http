@@ -137,7 +137,7 @@ static void net_notification_center_setup() {
  * @brief Initiate Microvisor application logging.
  */
 static void log_service_setup(void) {
-    if (net_handles.log == USER_HANDLE_LOGGING_STARTED) {
+    if (net_handles.log != USER_HANDLE_LOGGING_STARTED) {
         // Initialize logging with the standard system call
         enum MvStatus status = mvServerLoggingInit(log_buffer, log_buffer_size);
 
