@@ -1,4 +1,4 @@
-# Microvisor HTTP Demo 2.0.4
+# Microvisor HTTP Demo 2.0.5
 
 This repo provides a basic demonstration of a user application capable of working with Microvisor’s HTTP communications system calls. It has not hardware dependencies beyond the Twilio Microvisor Nucleo Development Board.
 
@@ -9,6 +9,8 @@ The [ARM CMSIS-RTOS API](https://github.com/ARM-software/CMSIS_5) is used an an 
 The application code files can be found in the [app_src/](app_src/) directory. The [ST_Code/](ST_Code/) directory contains required components that are not part of Twilio Microvisor STM32U5 HAL, which this sample accesses as a submodule. The `FreeRTOSConfig.h` and `stm32u5xx_hal_conf.h` configuration files are located in the [config/](config/) directory.
 
 ## Release Notes
+
+Version 2.0.5 makes no code changes but supports remote debugging via [Visual Studio Code](https://code.visualstudio.com/).
 
 Version 2.0.0 replaces earlier `printf()`-based application logging with Microvisor’s application logging system calls.
 
