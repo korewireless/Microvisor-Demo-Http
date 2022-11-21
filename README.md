@@ -12,9 +12,9 @@ The application code files can be found in the [app_src/](app_src/) directory. T
 
 Version 2.0.5 makes no code changes but supports remote debugging via [Visual Studio Code](https://code.visualstudio.com/).
 
-Version 2.0.0 replaces earlier `printf()`-based application logging with Microvisor’s application logging system calls.
+Version 2.0.1 adds optional [logging over UART](#uart-logging).
 
-Versions prior to 1.2.0 include a version of the `deploy.sh` script which is no longer compatible with the Microvisor REST API.
+Version 2.0.0 replaces earlier `printf()`-based application logging with Microvisor’s application logging system calls.
 
 ## Actions
 
