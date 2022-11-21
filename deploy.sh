@@ -7,7 +7,7 @@
 #
 # @author    Tony Smith
 # @copyright 2022, Twilio
-# @version   1.8.1
+# @version   1.8.2
 # @license   MIT
 #
 
@@ -114,6 +114,7 @@ check_prereqs() {
 
 build_app() {
     # Set up the build
+    [[ -d build ]] && rm -rf build
     cmake -S . -B build
 
     # Build the app itself
