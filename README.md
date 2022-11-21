@@ -1,4 +1,4 @@
-# Microvisor HTTP Demo 2.0.6
+# Microvisor HTTP Demo 2.0.7
 
 This repo provides a basic demonstration of a user application capable of working with Microvisor’s HTTP communications system calls. It has not hardware dependencies beyond the Twilio Microvisor Nucleo Development Board.
 
@@ -9,6 +9,8 @@ The [ARM CMSIS-RTOS API](https://github.com/ARM-software/CMSIS_5) is used an an 
 The application code files can be found in the [app_src/](app_src/) directory. The [ST_Code/](ST_Code/) directory contains required components that are not part of Twilio Microvisor STM32U5 HAL, which this sample accesses as a submodule. The `FreeRTOSConfig.h` and `stm32u5xx_hal_conf.h` configuration files are located in the [config/](config/) directory.
 
 ## Release Notes
+
+Version 2.0.7 adds [Docker support](#docker).
 
 Version 2.0.5 makes no code changes but supports remote debugging via [Visual Studio Code](https://code.visualstudio.com/).
 
@@ -22,7 +24,7 @@ The code creates and runs two threads.
 
 One thread periodically toggles GPIO A5, which is the user LED on the [Microvisor Nucleo Development Board](https://www.twilio.com/docs/iot/microvisor/microvisor-nucleo-development-board).
 
-The second thread It also emits a “ping” to the Microvisor logger once a second. Every 60 seconds it makes a `GET` request to `https://jsonplaceholder.typicode.com/todos/1`, a free API the delivers an object JSON testing.
+The second thread It also emits a “ping” to the Microvisor logger once a second. Every 30 seconds it makes a `GET` request to `https://jsonplaceholder.typicode.com/todos/1`, a free API the delivers an object JSON testing.
 
 ## Cloning the Repo
 
@@ -57,9 +59,35 @@ You will also need a Twilio Microvisor Nucleo Development Board. These are curre
 
 ## Software Setup
 
-This project is written in C. At this time, we only support Ubuntu 20.0.4. Users of other operating systems should build the code under a virtual machine running Ubuntu.
+This project is written in C. At this time, we only support Ubuntu 20.0.4. Users of other operating systems should build the code under a virtual machine running Ubuntu, or with Docker.
 
-**Note** macOS users may attempt to install the pre-requisites below using [Homebrew](https://brew.sh). This is not supported, but should work. You may need to change the names of a few of the packages listed in the `apt install` command below.
+**Note** Users of unsupported platforms may attempt to install the Microvisor toolchain using [this guidance](https://www.twilio.com/docs/iot/microvisor/install-microvisor-app-development-tools-on-unsupported-platforms).
+
+### Docker
+
+If you are running on an architecture other than x86/amd64 (such as a Mac with Apple silicon), you will need to override the platform when running docker. This is needed for the Twilio CLI apt package which is x86 only at this time:
+
+```shell
+export DOCKER_DEFAULT_PLATFORM=linux/amd64
+```
+
+Build the image:
+
+```shell
+docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t mv-http-demo-image .
+```
+
+Run the build:
+
+```
+docker run -it --rm -v $(pwd)/:/home/mvisor/project/ \
+  --env-file env.list \
+  --name mv-http-demo mv-http-demo-image
+```
+
+**Note** You will need to have exported certain environment variables, as [detailed below](#environment-variables).
+
+Under Docker, the demo is compiled, uploaded and deployed to your development board. It also initiates logging — hit <b>ctrl</b>-<b>c</b> to break out to the command prompt.
 
 ### Libraries and Tools
 
