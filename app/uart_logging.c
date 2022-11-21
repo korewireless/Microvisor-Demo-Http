@@ -1,7 +1,7 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 2.0.5
+ * Version 2.0.6
  * Copyright © 2022, Twilio
  * Licence: Apache 2.0
  *
@@ -15,20 +15,24 @@ UART_HandleTypeDef uart;
 /**
  * @brief Configure STM32U585 UART1.
  */
-void UART_init() {
-  uart.Instance           = USART2;
-  uart.Init.BaudRate      = 115200;              // Match your chosen speed
-  uart.Init.WordLength    = UART_WORDLENGTH_8B;  // 8
-  uart.Init.StopBits      = UART_STOPBITS_1;     // N
-  uart.Init.Parity        = UART_PARITY_NONE;    // 1
-  uart.Init.Mode          = UART_MODE_TX;        // TX only mode
-  uart.Init.HwFlowCtl     = UART_HWCONTROL_NONE; // No CTS/RTS
+bool UART_init() {
+    uart.Instance           = USART2;
+    uart.Init.BaudRate      = 115200;              // Match your chosen speed
+    uart.Init.WordLength    = UART_WORDLENGTH_8B;  // 8
+    uart.Init.StopBits      = UART_STOPBITS_1;     // N
+    uart.Init.Parity        = UART_PARITY_NONE;    // 1
+    uart.Init.Mode          = UART_MODE_TX;        // TX only mode
+    uart.Init.HwFlowCtl     = UART_HWCONTROL_NONE; // No CTS/RTS
 
-  // Initialize the UART
-  if (HAL_UART_Init(&uart) != HAL_OK) {
-    // Log error
-    return;
-  }
+    // Initialize the UART
+    if (HAL_UART_Init(&uart) != HAL_OK) {
+      // Log error
+      server_log("Could not enable logging UART");
+      return false;
+    }
+
+    server_log("UART logging enabled");
+    return true;
 }
 
 /**
@@ -37,37 +41,38 @@ void UART_init() {
  * @param uart: A HAL UART_HandleTypeDef pointer to the UART instance.
  */
 void HAL_UART_MspInit(UART_HandleTypeDef *uart) {
-  // This SDK-named function is called by HAL_UART_Init()
+    // This SDK-named function is called by HAL_UART_Init()
 
-  // Configure U5 peripheral clock
-  RCC_PeriphCLKInitTypeDef PeriphClkInit = { 0 };
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2;
-  PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
+    // Configure U5 peripheral clock
+    RCC_PeriphCLKInitTypeDef PeriphClkInit = { 0 };
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2;
+    PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
 
-  // Initialize U5 peripheral clock
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
-    // Log error
-    return;
-  }
+    // Initialize U5 peripheral clock
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
+        // Log error
+        server_log("Could not enable logging UART clock");
+        return;
+    }
 
-  // Enable the UART GPIO interface clock
-  __HAL_RCC_GPIOD_CLK_ENABLE();
+    // Enable the UART GPIO interface clock
+    __HAL_RCC_GPIOD_CLK_ENABLE();
 
-  // Configure the GPIO pins for UART
-  // Pin PD5 - TX
-  GPIO_InitTypeDef gpioConfig = { 0 };
-  gpioConfig.Pin       = GPIO_PIN_5;               // TX pin
-  gpioConfig.Mode      = GPIO_MODE_AF_PP;        // Pin's alt function with pull...
-  gpioConfig.Pull      = GPIO_NOPULL;              // ...but don't apply a pull
-  gpioConfig.Speed     = GPIO_SPEED_FREQ_HIGH;
-  gpioConfig.Alternate = GPIO_AF7_USART2;        // Select the alt function
+    // Configure the GPIO pins for UART
+    // Pin PD5 - TX
+    GPIO_InitTypeDef gpioConfig = { 0 };
+    gpioConfig.Pin       = GPIO_PIN_5;              // TX pin
+    gpioConfig.Mode      = GPIO_MODE_AF_PP;         // Pin's alt function with pull...
+    gpioConfig.Pull      = GPIO_NOPULL;             // ...but don't apply a pull
+    gpioConfig.Speed     = GPIO_SPEED_FREQ_HIGH;
+    gpioConfig.Alternate = GPIO_AF7_USART2;         // Select the alt function
 
-  // Initialize the pins with the setup data
-  HAL_GPIO_Init(GPIOD, &gpioConfig);
+    // Initialize the pins with the setup data
+    HAL_GPIO_Init(GPIOD, &gpioConfig);
 
 
-  // Enable the UART clock
-  __HAL_RCC_USART2_CLK_ENABLE();
+    // Enable the UART clock
+    __HAL_RCC_USART2_CLK_ENABLE();
 }
 
 /**

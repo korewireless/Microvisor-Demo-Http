@@ -1,7 +1,7 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 2.0.5
+ * Version 2.0.6
  * Copyright © 2022, Twilio
  * Licence: Apache 2.0
  *
@@ -40,6 +40,7 @@ static uint8_t log_buffer[4096] __attribute__((aligned(512))) = {0} ;
 // Entities for local serial logging
 // Declared in `uart_logging.c`
 extern UART_HandleTypeDef uart;
+bool uart_available = false;
 
 
 /**
@@ -56,10 +57,11 @@ static void log_start(void) {
     // NOTE This connection spans logging and HTTP comms
     net_open_network();
 
+    
+#ifdef ENABLE_UART_DEBUGGING
     // Establish UART logging
-    if (ENABLE_UART_DEBUGGING) {
-        UART_init();
-    }
+    uart_available = UART_init();
+#endif
 }
 
 
@@ -224,7 +226,7 @@ void do_log(bool is_err, char* format_string, va_list args) {
     mvServerLog((const uint8_t*)buffer, (uint16_t)strlen(buffer));
 
     // Do we output via UART too?
-    if (ENABLE_UART_DEBUGGING) {
+    if (uart_available) {
         // Add NEWLINE to the message and output to UART
         sprintf(&buffer[strlen(buffer)], "\n");
         UART_output((uint8_t*)buffer, strlen(buffer));
