@@ -372,7 +372,12 @@ static bool http_send_request() {
         }
 
         // Report send failure
-        server_error("Could not issue request. Status: %i", status);
+        if (status == 15) {
+            server_error("HTTP channel closed unexpectedly")
+        } else {
+            server_error("Could not issue request. Status: %i", status);
+        }
+        
         return false;
     }
 
