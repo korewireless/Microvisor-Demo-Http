@@ -1,8 +1,8 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 2.0.7
- * Copyright © 2022, Twilio
+ * Version 2.0.8
+ * Copyright © 2023, Twilio
  * Licence: Apache 2.0
  *
  */
@@ -15,8 +15,19 @@ extern "C" {
 #endif
 
 
-bool    UART_init(void);
-void    UART_output(uint8_t* buffer, uint16_t length);
+/*
+ * CONSTANTS
+ */
+#define UART_LOG_TIMESTAMP_MAX_LEN_B        64
+#define UART_LOG_MESSAGE_MAX_LEN_B          64
+
+
+/*
+ * PROTOTYPES
+ */
+bool    log_uart_init(void);
+void    log_uart_output(char* buffer);
+
 
 #ifdef __cplusplus
 }

@@ -1,13 +1,18 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 2.0.7
- * Copyright © 2022, Twilio
+ * Version 2.0.8
+ * Copyright © 2023, Twilio
  * Licence: Apache 2.0
  *
  */
 #ifndef LOGGING_H
 #define LOGGING_H
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 /*
@@ -19,10 +24,7 @@
 
 #define     USER_HANDLE_LOGGING_STARTED         0xFFFF
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define     LOG_MESSAGE_MAX_LEN_B               1024
 
 
 /*

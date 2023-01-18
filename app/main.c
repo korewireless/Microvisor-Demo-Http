@@ -1,8 +1,8 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 2.0.7
- * Copyright © 2022, Twilio
+ * Version 2.0.8
+ * Copyright © 2023, Twilio
  * Licence: Apache 2.0
  *
  */
@@ -14,8 +14,8 @@
  */
 static void system_clock_config(void);
 static void gpio_init(void);
-static void start_led_task(void *argument);
-static void start_http_task(void *argument);
+static void task_led(void *argument);
+static void task_http(void *argument);
 static void http_notification_center_setup(void);
 static bool http_open_channel(void);
 static void http_close_channel(void);
@@ -30,7 +30,7 @@ static void output_headers(uint32_t n);
  */
 
 // This is the CMSIS/FreeRTOS thread task that flashed the USER LED
-osThreadId_t LEDTask;
+osThreadId_t thread_led;
 const osThreadAttr_t led_task_attributes = {
     .name = "LEDTask",
     .stack_size = 2048,
@@ -38,7 +38,7 @@ const osThreadAttr_t led_task_attributes = {
 };
 
 // This is the CMSIS/FreeRTOS thread task that sends HTTP requests
-osThreadId_t HTTPTask;
+osThreadId_t thread_http;
 const osThreadAttr_t http_task_attributes = {
     .name = "HTTPTask",
     .stack_size = 4096,
@@ -71,6 +71,7 @@ volatile uint32_t current_notification_index = 0;
  *  @brief The application entry point.
  */
 int main(void) {
+    
     // Reset of all peripherals, Initializes the Flash interface and the sys tick.
     HAL_Init();
 
@@ -84,8 +85,8 @@ int main(void) {
     osKernelInitialize();
 
     // Create the FreeRTOS thread(s)
-    HTTPTask = osThreadNew(start_http_task, NULL, &http_task_attributes);
-    LEDTask  = osThreadNew(start_led_task,  NULL, &led_task_attributes);
+    thread_http = osThreadNew(task_http, NULL, &http_task_attributes);
+    thread_led  = osThreadNew(task_led,  NULL, &led_task_attributes);
 
     // Start the scheduler
     osKernelStart();
@@ -104,6 +105,7 @@ int main(void) {
  * @retval The clock value.
  */
 uint32_t SECURE_SystemCoreClockUpdate() {
+    
     uint32_t clock = 0;
     mvGetHClk(&clock);
     return clock;
@@ -114,6 +116,7 @@ uint32_t SECURE_SystemCoreClockUpdate() {
   * @brief System clock configuration.
   */
 static void system_clock_config(void) {
+    
     SystemCoreClockUpdate();
     HAL_InitTick(TICK_INT_PRIORITY);
 }
@@ -125,6 +128,7 @@ static void system_clock_config(void) {
  * Used to flash the Nucleo's USER LED, which is on GPIO Pin PA5.
  */
 static void gpio_init(void) {
+    
     // Enable GPIO port clock
     __HAL_RCC_GPIOA_CLK_ENABLE();
 
@@ -146,7 +150,8 @@ static void gpio_init(void) {
  *
  * @param  argument: Not used.
  */
-static void start_led_task(void *argument) {
+static void task_led(void *argument) {
+    
     uint32_t last_tick = 0;
 
     // The task's main loop
@@ -160,7 +165,7 @@ static void start_led_task(void *argument) {
             // Toggle the USER LED's GPIO pin
             HAL_GPIO_TogglePin(LED_GPIO_BANK, LED_GPIO_PIN);
         }
-
+        
         // End of cycle delay
         osDelay(10);
     }
@@ -172,7 +177,8 @@ static void start_led_task(void *argument) {
  *
  * @param  argument: Not used.
 */
-static void start_http_task(void *argument) {
+static void task_http(void *argument) {
+    
     uint32_t ping_count = 1;
     uint32_t kill_time = 0;
     uint32_t send_tick = 0;
@@ -221,8 +227,8 @@ static void start_http_task(void *argument) {
             kill_time = 0;
             http_close_channel();
         }
-
-        // Pause per cycle
+        
+        // End of cycle delay
         osDelay(10);
     }
 }
@@ -234,6 +240,7 @@ static void start_http_task(void *argument) {
  *  @retval `true` if the channel is open, otherwise `false`.
  */
 static bool http_open_channel(void) {
+    
     // Set up the HTTP channel's multi-use send and receive buffers
     static volatile uint8_t http_rx_buffer[HTTP_RX_BUFFER_SIZE_B] __attribute__((aligned(512)));
     static volatile uint8_t http_tx_buffer[HTTP_TX_BUFFER_SIZE_B] __attribute__((aligned(512)));
@@ -281,6 +288,7 @@ static bool http_open_channel(void) {
  *  @brief Close the currently open HTTP channel.
  */
 static void http_close_channel(void) {
+    
     // If we have a valid channel handle -- ie. it is non-zero --
     // then ask Microvisor to close it and confirm acceptance of
     // the closure request.
@@ -299,6 +307,7 @@ static void http_close_channel(void) {
  * @brief Configure the channel Notification Center.
  */
 static void http_notification_center_setup(void) {
+    
     // Clear the notification store
     memset((void *)http_notification_center, 0x00, sizeof(http_notification_center));
 
@@ -327,6 +336,7 @@ static void http_notification_center_setup(void) {
  * @retval `true` if the request was accepted by Microvisor, otherwise `false`
  */
 static bool http_send_request() {
+    
     // Make sure we have a valid channel handle
     if (http_handles.channel != 0) {
         server_log("Sending HTTP request");
@@ -357,7 +367,7 @@ static bool http_send_request() {
         // Issue the request -- and check its status
         enum MvStatus status = mvSendHttpRequest(http_handles.channel, &request_config);
         if (status == MV_STATUS_OKAY) {
-            server_log("Request sent to Twilio");
+            server_log("Request to %s sent to Twilio", uri);
             return true;
         }
 
@@ -380,6 +390,7 @@ static bool http_send_request() {
  *  and extract HTTP response data when it is available.
  */
 void TIM8_BRK_IRQHandler(void) {
+    
     // Check for a suitable event: readable data in the channel
     volatile struct MvNotification notification = http_notification_center[current_notification_index];
     if (notification.event_type == MV_EVENTTYPE_CHANNELDATAREADABLE) {
@@ -402,6 +413,7 @@ void TIM8_BRK_IRQHandler(void) {
  * @brief Process HTTP response data
  */
 static void http_process_response(void) {
+    
     // We have received data via the active HTTP channel so establish
     // an `MvHttpResponseData` record to hold response metadata
     static struct MvHttpResponseData resp_data;
@@ -444,6 +456,7 @@ static void http_process_response(void) {
  * @param n: The number of headers to list.
  */
 static void output_headers(uint32_t n) {
+    
     if (n > 0) {
         enum MvStatus status = MV_STATUS_OKAY;
         uint8_t buffer[256];
@@ -464,7 +477,10 @@ static void output_headers(uint32_t n) {
  * @brief Show basic device info.
  */
 static void log_device_info(void) {
+    
     uint8_t buffer[35] = { 0 };
     mvGetDeviceId(buffer, 34);
-    server_log("Info:\nDevice: %s\n   App: %s %s\n Build: %i", buffer, APP_NAME, APP_VERSION, BUILD_NUM);
+    server_log("Device: %s", buffer);
+    server_log("   App: %s %s", APP_NAME, APP_VERSION);
+    server_log(" Build: %i", BUILD_NUM);
 }

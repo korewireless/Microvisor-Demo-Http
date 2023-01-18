@@ -1,8 +1,8 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 2.0.7
- * Copyright © 2022, Twilio
+ * Version 2.0.8
+ * Copyright © 2023, Twilio
  * Licence: Apache 2.0
  *
  */

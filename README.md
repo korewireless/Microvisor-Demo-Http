@@ -1,4 +1,4 @@
-# Microvisor HTTP Demo 2.0.7
+# Microvisor HTTP Demo 2.0.8
 
 This repo provides a basic demonstration of a user application capable of working with Microvisor’s HTTP communications system calls. It has not hardware dependencies beyond the Twilio Microvisor Nucleo Development Board.
 
@@ -55,7 +55,7 @@ We recommend following this by deleting your `build` directory.
 
 You will need a Twilio account. [Sign up now if you don’t have one](https://www.twilio.com/try-twilio).
 
-You will also need a Twilio Microvisor Nucleo Development Board. These are currently only available to Private Beta program participants.
+You will also need a Twilio Microvisor Nucleo Development Board.
 
 ## Software Setup
 
@@ -176,7 +176,7 @@ set(ENABLE_REMOTE_DEBUGGING 1)
 
 in the root `CMakeLists.txt` file to `0` to disable this.
 
-Enabling remote debugging in the build does not initiate a GDB session — you will have to do this manually. Follow the instructions in the [Microvisor documentation](https://www.twilio.com/docs/iot/microvisor/microvisor-remote-debugging) **Private Beta participants only**
+Enabling remote debugging in the build does not initiate a GDB session — you will have to do this manually. Follow the instructions in the [Microvisor documentation](https://www.twilio.com/docs/iot/microvisor/microvisor-remote-debugging).
 
 This repo contains a `.gdbinit` file which sets the remote target to localhost on port 8001 to match the Twilio CLI Microvisor plugin remote debugging defaults.
 
@@ -194,7 +194,7 @@ You will need to pass the path to the private key to the Twilio CLI Microvisor p
 
 ## Copyright and Licensing
 
-The sample code and Microvisor SDK is © 2022, Twilio, Inc. It is licensed under the terms of the [Apache 2.0 License](./LICENSE).
+The sample code and Microvisor SDK is © 2023, Twilio, Inc. It is licensed under the terms of the [Apache 2.0 License](./LICENSE).
 
 The SDK makes used of code © 2021, STMicroelectronics and affiliates. This code is licensed under terms described in [this file](https://github.com/twilio/twilio-microvisor-hal-stm32u5/blob/main/LICENSE-STM32CubeU5.md).
 
