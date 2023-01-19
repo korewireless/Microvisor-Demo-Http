@@ -80,6 +80,9 @@ int main(void) {
 
     // Initialize peripherals
     gpio_init();
+    
+    // Get the Device ID and build number
+    log_device_info();
 
     // Init scheduler
     osKernelInitialize();
@@ -183,9 +186,6 @@ static void task_http(void *argument) {
     uint32_t kill_time = 0;
     uint32_t send_tick = 0;
     bool do_close_channel = false;
-
-    // Get the Device ID and build number and log them
-    log_device_info();
 
     // Set up channel notifications
     http_notification_center_setup();
