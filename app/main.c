@@ -21,7 +21,7 @@ static bool http_open_channel(void);
 static void http_close_channel(void);
 static enum MvStatus http_send_request(void);
 static void http_process_response(void);
-static void http_show_channel_closure(void);
+
 static void log_device_info(void);
 static void output_headers(uint32_t n);
 
@@ -34,7 +34,7 @@ static void output_headers(uint32_t n);
 osThreadId_t thread_led;
 const osThreadAttr_t attributes_thread_led = {
     .name = "LEDTask",
-    .stack_size = configMINIMAL_STACK_SIZE,
+    .stack_size = 2560,
     .priority = (osPriority_t) osPriorityNormal
 };
 
@@ -42,7 +42,7 @@ const osThreadAttr_t attributes_thread_led = {
 osThreadId_t thread_http;
 const osThreadAttr_t attributes_thread_http = {
     .name = "HTTPTask",
-    .stack_size = (configMINIMAL_STACK_SIZE << 1),
+    .stack_size = 5120,
     .priority = (osPriority_t) osPriorityNormal
 };
 
@@ -208,21 +208,13 @@ static void task_http(void *argument) {
                 kill_time = tick;
             } else {
                 server_error("Channel handle not zero");
-                http_close_channel();
+                do_close_channel = true;
             }
         }
 
         // Process a request's response if indicated by the ISR
         if (received_request) http_process_response();
         
-        // FROM 2.1.6
-        // Was the channel closed unexpectedly?
-        // `channel_was_closed` set in IRS
-        if (channel_was_closed) {
-            http_show_channel_closure();
-            channel_was_closed = false;
-        }
-
         // Use 'kill_time' to force-close an open HTTP channel
         // if it's been left open too long
         if (kill_time > 0 && tick - kill_time > CHANNEL_KILL_PERIOD_MS) {
@@ -379,8 +371,6 @@ static enum MvStatus http_send_request(void) {
         enum MvStatus status = mvSendHttpRequest(http_handles.channel, &request_config);
         if (status == MV_STATUS_OKAY) {
             server_log("Request sent to Twilio");
-        } else if (status == MV_STATUS_CHANNELCLOSED) {
-            http_show_channel_closure();
         } else {
             server_error("Could not issue HTTP request. Status: %i", status);
         }
@@ -392,37 +382,6 @@ static enum MvStatus http_send_request(void) {
     // try to send again
     http_open_channel();
     return http_send_request();
-}
-
-
-/**
- *  @brief Display a reason for an unexpectedly closed channel.
- */
-static void http_show_channel_closure(void) {
-    
-    // FROM 2.1.6
-    server_error("HTTP channel %lu closed unexpectedly", http_handles.channel);
-    enum MvClosureReason reason = 0;
-    if (mvGetChannelClosureReason(http_handles.channel, &reason) == MV_STATUS_OKAY) {
-        switch(reason) {
-            case 1:
-                server_error("The channel was closed by the server");
-                break;
-            case 2:
-                server_error("The server reset the channel");
-                break;
-            case 3:
-                server_error("The channel was closed because the network was disconnected");
-                break;
-            case 4:
-                server_error("The connection to the server was terminated due to an error");
-                break;
-            default:
-                server_error("Reason unknown");
-        }
-    } else {
-        server_error("Reason unknown");
-    }
 }
 
 

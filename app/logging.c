@@ -58,7 +58,7 @@ static void log_start(void) {
     // NOTE This connection spans logging and HTTP comms
     net_open_network();
 
-#ifdef ENABLE_UART_DEBUGGING
+#if ENABLE_UART_DEBUGGING == true
     // Establish UART logging
     uart_available = log_uart_init();
 #endif
