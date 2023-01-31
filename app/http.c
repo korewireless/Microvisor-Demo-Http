@@ -176,10 +176,10 @@ enum MvStatus http_send_request(uint32_t item_number) {
 
 
 /**
- *  @brief The HTTP channel notification interrupt handler.
+ * @brief The HTTP channel notification interrupt handler.
  *
- *  This is called by Microvisor -- we need to check for key events
- *  and extract HTTP response data when it is available.
+ * This is called by Microvisor -- we need to check for key events
+ * and extract HTTP response data when it is available.
  */
 void TIM8_BRK_IRQHandler(void) {
     

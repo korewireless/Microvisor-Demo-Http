@@ -48,7 +48,6 @@ static const osThreadAttr_t attributes_thread_http = {
  */
 volatile bool   received_request = false;
 volatile bool   channel_was_closed = false;
-volatile bool   network_state_flag = false;
 
 /**
  * These variables are defined in `http.c`
@@ -216,18 +215,6 @@ static void task_http(void *argument) {
             
             channel_was_closed = false;
             do_close_channel = true;
-        }
-        
-        if (network_state_flag) {
-            enum MvNetworkReason reasons;
-            uint32_t current_handle_count;
-            if (mvGetNetworkReasons(&reasons, &current_handle_count) == MV_STATUS_OKAY) {
-                server_log("Network state: 0x%04X. Handles: %lu", (uint32_t)reasons, current_handle_count);
-            } else {
-                server_error("Couldn't get network state");
-            }
-            
-            network_state_flag = false;
         }
         
         // Use 'kill_time' to force-close an open HTTP channel
