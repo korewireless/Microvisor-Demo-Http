@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 # Set application data
 set(APP "Microvisor HTTP Demo")
 set(VERSION_NUMBER "2.0.8")
-set(BUILD_NUMBER "6")
+set(BUILD_NUMBER "0")
 
 message("Building ${APP} ${VERSION_NUMBER} build ${BUILD_NUMBER}")
 
@@ -17,6 +17,7 @@ add_executable(${PROJECT_NAME}
     main.c
     logging.c
     uart_logging.c
+    http.c
     stm32u5xx_hal_timebase_tim_template.c
 )
 
@@ -24,7 +25,8 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC
     ST_Code
     twilio-microvisor-hal-stm32u5
-    FreeRTOS)
+    FreeRTOS
+)
 
 # Optional informational and additional format generation
 # NOTE From 2.0.3, this generates an alternative .bin file

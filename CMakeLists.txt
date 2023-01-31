@@ -12,7 +12,7 @@ add_compile_definitions(LOG_DEBUG_MESSAGES=true)
 # Set to false to stop UART debugging for disconnected apps
 # This requires additional hardware: an FTDI USB-to-UART cable,
 # connected to GPIO pin PD5 (board TX, cable RX) and GND
-add_compile_definitions(ENABLE_UART_DEBUGGING=false)
+add_compile_definitions(ENABLE_UART_DEBUGGING=true)
 
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain.cmake")
 
@@ -63,7 +63,8 @@ target_include_directories(ST_Code PUBLIC
 
 target_link_libraries(ST_Code LINK_PUBLIC
     twilio-microvisor-hal-stm32u5
-    FreeRTOS)
+    FreeRTOS
+)
 
 # Build FreeRTOS
 add_library(FreeRTOS STATIC
