@@ -1,7 +1,7 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 2.0.8
+ * Version 3.0.0
  * Copyright © 2023, Twilio
  * Licence: Apache 2.0
  *
@@ -47,6 +47,8 @@ extern "C" {
 
 #define     DEBUG_TASK_PAUSE_MS         1000
 #define     DEFAULT_TASK_PAUSE_MS       500
+#define     LED_PAUSE_MS                2000
+#define     LED_PULSE_MS                100
 
 #define     REQUEST_SEND_PERIOD_MS      30000
 #define     CHANNEL_KILL_PERIOD_MS      15000

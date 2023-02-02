@@ -1,7 +1,7 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 2.0.8
+ * Version 3.0.0
  * Copyright © 2023, Twilio
  * Licence: Apache 2.0
  *
@@ -40,7 +40,6 @@ bool http_open_channel(void) {
     // Set up the HTTP channel's multi-use send and receive buffers
     static volatile uint8_t http_rx_buffer[HTTP_RX_BUFFER_SIZE_B] __attribute__((aligned(512)));
     static volatile uint8_t http_tx_buffer[HTTP_TX_BUFFER_SIZE_B] __attribute__((aligned(512)));
-    static const char endpoint[] = "";
 
     // Get the network channel handle.
     // NOTE This is set in `logging.c` which puts the network in place
@@ -61,8 +60,10 @@ bool http_open_channel(void) {
             .send_buffer         = (uint8_t*)http_tx_buffer,
             .send_buffer_len     = sizeof(http_tx_buffer),
             .channel_type        = MV_CHANNELTYPE_HTTP,
-            .endpoint            = (uint8_t*)endpoint,
-            .endpoint_len        = 0
+            .endpoint            = {
+                .data = (uint8_t*)"",
+                .length = 0
+            }
         }
     };
 
@@ -150,14 +151,20 @@ enum MvStatus http_send_request(uint32_t item_number) {
     sprintf(uri, "https://jsonplaceholder.typicode.com/todos/%lu", item_number);
     struct MvHttpHeader hdrs[] = {};
     struct MvHttpRequest request_config = {
-        .method = (uint8_t *)verb,
-        .method_len = strlen(verb),
-        .url = (uint8_t *)uri,
-        .url_len = strlen(uri),
+        .method = {
+            .data = (uint8_t *)verb,
+            .length = strlen(verb)
+        },
+        .url = {
+            .data = (uint8_t *)uri,
+            .length = strlen(uri)
+        },
         .num_headers = 0,
         .headers = hdrs,
-        .body = (uint8_t *)body,
-        .body_len = strlen(body),
+        .body = {
+            .data = (uint8_t *)body,
+            .length = strlen(body)
+        },
         .timeout_ms = 10000
     };
 

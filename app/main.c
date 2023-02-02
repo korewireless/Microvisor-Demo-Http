@@ -1,7 +1,7 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 2.0.8
+ * Version 3.0.0
  * Copyright © 2023, Twilio
  * Licence: Apache 2.0
  *
@@ -155,11 +155,11 @@ static void task_led(void *argument) {
         // Periodically update the display and flash the USER LED
         // Get the ms timer value
         uint32_t tick = HAL_GetTick();
-        if (tick - last_tick > DEFAULT_TASK_PAUSE_MS) {
+        if (tick - last_tick > LED_PAUSE_MS) {
             last_tick = tick;
-
-            // Toggle the USER LED's GPIO pin
-            HAL_GPIO_TogglePin(LED_GPIO_BANK, LED_GPIO_PIN);
+            HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, GPIO_PIN_SET);
+        } else if (tick - last_tick > LED_PULSE_MS) {
+            HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, GPIO_PIN_RESET);
         }
         
         // End of cycle delay
