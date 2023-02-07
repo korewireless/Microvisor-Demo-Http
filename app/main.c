@@ -71,12 +71,15 @@ int main(void) {
     // Configure the system clock
     system_clock_config();
 
-    // Initialize peripherals
-    gpio_init();
-    
     // Get the Device ID and build number
     log_device_info();
 
+    // Start the network
+    net_open_network();
+    
+    // Initialize peripherals
+    gpio_init();
+    
     // Init scheduler
     osKernelInitialize();
 

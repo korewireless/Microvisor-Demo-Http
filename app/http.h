@@ -16,6 +16,14 @@ extern "C" {
 
 
 /*
+ * CONSTANTS
+ */
+#define     HTTP_RX_BUFFER_SIZE_B       2560
+#define     HTTP_TX_BUFFER_SIZE_B       512
+#define     HTTP_NT_BUFFER_SIZE_R       8       
+
+
+/*
  * PROTOTYPES
  */
 void            http_notification_center_setup(void);

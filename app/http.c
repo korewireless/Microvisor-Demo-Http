@@ -147,8 +147,8 @@ enum MvStatus http_send_request(uint32_t item_number) {
     // Set up the request
     const char verb[] = "GET";
     const char body[] = "";
-    char uri[46] = "";
-    sprintf(uri, "https://jsonplaceholder.typicode.com/todos/%lu", item_number);
+    char url[46] = "";
+    sprintf(url, "https://jsonplaceholder.typicode.com/todos/%lu", item_number);
     struct MvHttpHeader hdrs[] = {};
     struct MvHttpRequest request_config = {
         .method = {
@@ -156,8 +156,8 @@ enum MvStatus http_send_request(uint32_t item_number) {
             .length = strlen(verb)
         },
         .url = {
-            .data = (uint8_t *)uri,
-            .length = strlen(uri)
+            .data = (uint8_t *)url,
+            .length = strlen(url)
         },
         .num_headers = 0,
         .headers = hdrs,

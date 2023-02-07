@@ -23,6 +23,7 @@ extern "C" {
 #define     USER_TAG_HTTP_OPEN_CHANNEL          3
 
 #define     USER_HANDLE_LOGGING_STARTED         0xFFFF
+#define     USER_HANDLE_LOGGING_OFF             0
 
 #define     LOG_MESSAGE_MAX_LEN_B               1024
 #define     LOG_BUFFER_SIZE_B                   4096
@@ -33,9 +34,6 @@ extern "C" {
 /*
  * PROTOTYPES
  */
-MvNetworkHandle get_net_handle(void);
-uint32_t        get_log_handle(void);
-
 void            server_log(char* format_string, ...);
 void            server_error(char* format_string, ...);
 void            do_assert(bool condition, char* message);

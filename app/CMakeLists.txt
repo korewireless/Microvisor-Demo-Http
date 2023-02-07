@@ -14,10 +14,11 @@ add_compile_definitions(BUILD_NUM=${BUILD_NUMBER})
 
 # Compile app source code file(s)
 add_executable(${PROJECT_NAME}
-    main.c
-    logging.c
-    uart_logging.c
     http.c
+    logging.c
+    main.c
+    network.c
+    uart_logging.c
     stm32u5xx_hal_timebase_tim_template.c
 )
 

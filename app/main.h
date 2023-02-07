@@ -32,6 +32,7 @@
 #include "logging.h"
 #include "uart_logging.h"
 #include "http.h"
+#include "network.h"
 
 
 #ifdef __cplusplus
@@ -52,10 +53,6 @@ extern "C" {
 
 #define     REQUEST_SEND_PERIOD_MS      30000
 #define     CHANNEL_KILL_PERIOD_MS      15000
-
-#define     HTTP_RX_BUFFER_SIZE_B       1536
-#define     HTTP_TX_BUFFER_SIZE_B       512
-#define     HTTP_NT_BUFFER_SIZE_R       8             // NOTE Size in records, not bytes
 
 #define     MAX_HEADERS_OUTPUT          10
 
