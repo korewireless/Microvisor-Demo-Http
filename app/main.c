@@ -185,7 +185,7 @@ static void task_http(void *argument) {
     enum MvStatus result = MV_STATUS_OKAY;
 
     // Set up channel notifications
-    http_notification_center_setup();
+    http_setup_notification_center();
 
     // Run the thread's main loop
     while (1) {
