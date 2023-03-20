@@ -10,7 +10,7 @@ The application code files can be found in the [app/](app/) directory. The [ST_C
 
 ## Release Notes
 
-* 3.0.0 requires Microvisor kernel 0.5.0 or above.
+* 3.0.0 requires Microvisor kernel 0.5.0 or above, and Twilio CLI Microvisor Plugin 0.3.10 or above.
 * 2.0.7 adds [Docker support](#docker).
 * 2.0.5 makes no code changes but supports remote debugging via [Visual Studio Code](https://code.visualstudio.com/).
 * 2.0.1 adds optional [logging over UART](#uart-logging).
@@ -141,25 +141,17 @@ It is also accessible via the QR code on the back of your development board.
 Run:
 
 ```bash
-./deploy.sh --log
+twilio microvisor:deploy . --devicesid ${MV_DEVICE_SID}
 ```
 
 This will compile, bundle and upload the code, and stage it for deployment to your device. If you encounter errors, please check your stored Twilio credentials.
 
 The `--log` flag initiates log-streaming.
 
-## View Log Output
-
-You can start log streaming separately with this command:
-
-```bash
-./deploy.sh --logonly
-```
-
 For more information, run
 
 ```bash
-./deploy.sh --help
+twilio microvisor:deploy --help
 ```
 
 ## UART Logging
@@ -182,12 +174,14 @@ This repo contains a `.gdbinit` file which sets the remote target to localhost o
 
 #### Remote Debugging Encryption
 
-Remote debugging sessions are encrypted. To generate keys, add the `--gen-keys` switch to the deploy script call, or generate your own keys — see the documentation linked above for details.
+Remote debugging sessions are encrypted. To generate keys, add the `--genkeys` switch to the deploy call above, or generate your own keys — see the documentation linked above for details.
 
-Use the `--public-key-path` and `--private-key-path` options to either specify existing keys, or to specify where you would like script-generated keys to be stored. By default, keys will be stored in the `build` directory so they will not be inadvertently push to a public git repo:
+Use the `--publickey /path/to/public/key` and `--privatekey /path/to/private/key` options to either specify existing keys, or to specify where you would like script-generated keys to be stored. By default, keys will be stored in the `build` directory so they will not be inadvertently push to a public git repo:
 
 ```
-./deploy.sh --private-key /path/to/private/key.pem --public-key /path/to/public/key.pem
+twilio microvisor:deploy . --devicesid ${MV_DEVICE_SID} \
+  --privatekey /path/to/private/key.pem \
+  --publickey /path/to/public/key.pem
 ```
 
 You will need to pass the path to the private key to the Twilio CLI Microvisor plugin to decrypt debugging data. The deploy script will output this path for you.
