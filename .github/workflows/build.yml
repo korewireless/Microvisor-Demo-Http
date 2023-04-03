@@ -1,0 +1,25 @@
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 18 * * *'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+    - name: Build docker image
+      run: docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t microvisor-http-image .
+    - name: Build code
+      run: docker run --rm -v $(pwd)/:/home/mvisor/project/ --env MICROVISOR_GITHUB_ACTION_HTTP_TEST=true --name microvisor-http-demo microvisor-http-image
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: mv-http-demo
+        path: ${{ github.workspace }}/build/app/mv-http-demo.*
