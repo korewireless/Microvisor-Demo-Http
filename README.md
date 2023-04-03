@@ -1,4 +1,4 @@
-# Microvisor HTTP Demo 3.0.0
+# Microvisor HTTP Demo 3.0.1
 
 This repo provides a basic demonstration of a user application capable of working with Microvisor’s HTTP communications system calls. It has no hardware dependencies beyond the Twilio Microvisor Nucleo Development Board.
 
@@ -176,7 +176,7 @@ This repo contains a `.gdbinit` file which sets the remote target to localhost o
 
 Remote debugging sessions are encrypted. To generate keys, add the `--genkeys` switch to the deploy call above, or generate your own keys — see the documentation linked above for details.
 
-Use the `--publickey /path/to/public/key` and `--privatekey /path/to/private/key` options to either specify existing keys, or to specify where you would like script-generated keys to be stored. By default, keys will be stored in the `build` directory so they will not be inadvertently push to a public git repo:
+Use the `--publickey /path/to/public/key` and `--privatekey /path/to/private/key` options to either specify existing keys, or to specify where you would like plugin-generated keys to be stored. By default, keys will be stored in the `build` directory so they will not be inadvertently push to a public git repo:
 
 ```
 twilio microvisor:deploy . --devicesid ${MV_DEVICE_SID} \
@@ -184,7 +184,7 @@ twilio microvisor:deploy . --devicesid ${MV_DEVICE_SID} \
   --publickey /path/to/public/key.pem
 ```
 
-You will need to pass the path to the private key to the Twilio CLI Microvisor plugin to decrypt debugging data. The deploy script will output this path for you.
+You will need to pass the path to the private key to the Twilio CLI Microvisor plugin to decrypt debugging data. The plugin will output this path for you.
 
 ## Copyright and Licensing
 
