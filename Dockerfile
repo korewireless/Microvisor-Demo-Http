@@ -12,11 +12,9 @@ RUN apt-get -yqq update \
 
 # Twilio CLI for bundle generation via npm
 # as a binary debian package is not yet available for Apple Silicon
-RUN apt-get -yqq update \
-    && apt install -y curl \
+RUN apt -yqq update && apt install -y curl \
     && curl -sL https://deb.nodesource.com/setup_19.x | bash - \
-    && apt install -y nodejs \
-    && npm install -g twilio-cli
+    && apt install -y nodejs && npm install -g twilio-cli
 
 WORKDIR /home/${USERNAME}/
 
