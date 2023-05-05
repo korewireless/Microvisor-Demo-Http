@@ -1,13 +1,13 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 3.0.1
+ * Version 3.0.2
  * Copyright © 2023, Twilio
  * Licence: Apache 2.0
  *
  */
 #include "main.h"
-
+#include "app_version.h"
 
 /*
  * STATIC PROTOTYPES
