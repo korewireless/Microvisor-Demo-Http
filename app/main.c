@@ -9,6 +9,7 @@
 #include "main.h"
 #include "app_version.h"
 
+
 /*
  * STATIC PROTOTYPES
  */
