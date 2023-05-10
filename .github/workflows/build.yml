@@ -17,4 +17,4 @@ jobs:
     - name: Build Docker image
       run: docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t microvisor-http-image .
     - name: Build application code
-      run: docker run --rm -v $(pwd)/:/home/mvisor/project/ --env MICROVISOR_GITHUB_ACTION_HTTP_TEST=true --name microvisor-http-demo microvisor-http-image
+      run: docker run --rm -v $(pwd)/:/home/mvisor/project/ --env BUILD_ONLY=true --name microvisor-http-demo microvisor-http-image
