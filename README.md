@@ -10,11 +10,7 @@ The application code files can be found in the [app/](app/) directory. The [ST_C
 
 ## Release Notes
 
-* 3.0.0 requires Microvisor kernel 0.5.0 or above, and [Twilio CLI Microvisor Plugin 0.3.10](https://www.twilio.com/docs/iot/microvisor/the-twilio-cli-microvisor-plugin) or above.
-* 2.0.7 adds [Docker support](#docker).
-* 2.0.5 makes no code changes but supports remote debugging via [Visual Studio Code](https://code.visualstudio.com/).
-* 2.0.1 adds optional [logging over UART](#uart-logging).
-* 2.0.0 replaces earlier `printf()`-based application logging with Microvisor’s application logging system calls.
+* 3.0.x requires Microvisor kernel 0.5.0 or above, and [Twilio CLI Microvisor Plugin 0.3.10](https://www.twilio.com/docs/iot/microvisor/the-twilio-cli-microvisor-plugin) or above.
 
 ## Actions
 

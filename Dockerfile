@@ -22,4 +22,4 @@ USER $USERNAME
 
 RUN twilio plugins:install "@twilio/plugin-microvisor"
 
-ENTRYPOINT ./project/docker-entrypoint.sh
+ENTRYPOINT ["./project/docker-entrypoint.sh"]

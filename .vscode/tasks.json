@@ -10,7 +10,10 @@
                 "build_app",
                 "deploy_delay",
                 "start_server"
-            ]
+            ],
+            "presentation": {
+                "showReuseMessage": false
+            }
         },
         {
             "label": "start_server",
@@ -27,31 +30,50 @@
                     "beginsPattern": "^GDB server listening",
                     "endsPattern": "^GDB server listening"
                 }
+            },
+            "presentation": {
+                "showReuseMessage": false
             }
         },
         {
             "label": "deploy_delay",
             "type": "shell",
             "command": "echo Waiting 30s for app to deploy... && sleep 30",
-            "isBackground": false
+            "isBackground": false,
+            "presentation": {
+                "echo": false,
+                "showReuseMessage": false
+            }
         },
         {
             "label": "build_app",
             "type": "shell",
             "command": "twilio microvisor:deploy ${workspaceRoot} --devicesid ${MV_DEVICE_SID} --privatekey $HOME/pvkey.pem --publickey $HOME/pukey.pem",
-            "isBackground": false
+            "isBackground": false,
+            "presentation": {
+                "echo": false,
+                "showReuseMessage": false
+            }
         },
         {
             "label": "generate_keys",
             "type": "shell",
             "command": "twilio microvisor:debug:generate_keypair --debug-auth-privkey $HOME/pvkey.pem --debug-auth-pubkey $HOME/pukey.pem --force",
-            "isBackground": false
+            "isBackground": false,
+            "presentation": {
+                "echo": false,
+                "showReuseMessage": false
+            }
         },
         {
             "label": "prereqs_check",
             "type": "shell",
             "command": "which twilio > /dev/null 2>&1 && echo $(twilio plugins) | grep microvisor > /dev/null 2>&1",
-            "isBackground": false
+            "isBackground": false,
+            "presentation": {
+                "echo": false,
+                "showReuseMessage": false
+            }
         }
     ]
 }
