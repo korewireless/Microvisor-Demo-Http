@@ -12,11 +12,6 @@ message("Building ${APP} ${VERSION_NUMBER} build ${BUILD_NUMBER}")
 configure_file(app_version.in app_version.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-# Make app data available to the compiler
-#add_compile_definitions(APP_NAME="${APP}")
-#add_compile_definitions(APP_VERSION="${VERSION_NUMBER}")
-#add_compile_definitions(BUILD_NUM=${BUILD_NUMBER})
-
 # Compile app source code file(s)
 add_executable(${PROJECT_NAME}
     http.c
