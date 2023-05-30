@@ -30,7 +30,7 @@ static void output_headers(uint32_t n);
 static osThreadId_t thread_led;
 static const osThreadAttr_t attributes_thread_led = {
     .name = "LEDTask",
-    .stack_size = 2560,
+    .stack_size = 3072,
     .priority = (osPriority_t) osPriorityNormal
 };
 
@@ -38,7 +38,7 @@ static const osThreadAttr_t attributes_thread_led = {
 static osThreadId_t thread_http;
 static const osThreadAttr_t attributes_thread_http = {
     .name = "HTTPTask",
-    .stack_size = 5120,
+    .stack_size = 8192,
     .priority = (osPriority_t) osPriorityNormal
 };
 

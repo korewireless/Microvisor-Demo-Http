@@ -85,7 +85,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *uart) {
  */
 void log_uart_output(char* buffer) {
     
-    char uart_buffer[UART_LOG_TIMESTAMP_MAX_LEN_B + LOG_MESSAGE_MAX_LEN_B + 3] = {0};
+    static char uart_buffer[UART_LOG_TIMESTAMP_MAX_LEN_B + LOG_MESSAGE_MAX_LEN_B + 3] = {0};
     
     uint64_t usec = 0;
     time_t sec = 0;

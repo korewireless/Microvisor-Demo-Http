@@ -106,7 +106,7 @@ void server_error(char* format_string, ...) {
 static void post_log(bool is_err, char* format_string, va_list args) {
     
     log_start();
-    char buffer[LOG_MESSAGE_MAX_LEN_B] = {0};
+    static char buffer[LOG_MESSAGE_MAX_LEN_B] = {0};
 
     // Write the message type to the message
     sprintf(buffer, is_err ? "[ERROR] " : "[DEBUG] ");
