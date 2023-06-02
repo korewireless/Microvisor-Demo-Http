@@ -1,9 +1,9 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 3.0.3
- * Copyright © 2023, Twilio
- * Licence: Apache 2.0
+ * Version 3.1.0
+ * Copyright © 2023, KORE Wireless
+ * Licence: MIT
  *
  */
 #include "main.h"
@@ -30,7 +30,7 @@ static void output_headers(uint32_t n);
 static osThreadId_t thread_led;
 static const osThreadAttr_t attributes_thread_led = {
     .name = "LEDTask",
-    .stack_size = 3072,
+    .stack_size = 2048,
     .priority = (osPriority_t) osPriorityNormal
 };
 

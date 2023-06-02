@@ -1,9 +1,9 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 3.0.3
- * Copyright © 2023, Twilio
- * Licence: Apache 2.0
+ * Version 3.1.0
+ * Copyright © 2023, KORE Wireless
+ * Licence: MIT
  *
  */
 #include "main.h"
@@ -104,9 +104,11 @@ void server_error(char* format_string, ...) {
  * @param args          va_list of args from previous call
  */
 static void post_log(bool is_err, char* format_string, va_list args) {
-    
-    log_start();
+
     static char buffer[LOG_MESSAGE_MAX_LEN_B] = {0};
+
+    // Initialize logging if we need to
+    log_start();
 
     // Write the message type to the message
     sprintf(buffer, is_err ? "[ERROR] " : "[DEBUG] ");

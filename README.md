@@ -1,4 +1,4 @@
-# Microvisor HTTP Demo 3.0.3
+# Microvisor HTTP Demo 3.1.0
 
 This repo provides a basic demonstration of a user application capable of working with Microvisor’s HTTP communications system calls. It has no hardware dependencies beyond the Twilio Microvisor Nucleo Development Board.
 
@@ -184,7 +184,7 @@ You will need to pass the path to the private key to the Twilio CLI Microvisor p
 
 ## Copyright and Licensing
 
-The sample code and Microvisor SDK is © 2023, Twilio, Inc. It is licensed under the terms of the [Apache 2.0 License](./LICENSE).
+The sample code and Microvisor SDK is © 2023, KORE Wireless. It is licensed under the terms of the [MIT](./LICENSE.md).
 
 The SDK makes used of code © 2021, STMicroelectronics and affiliates. This code is licensed under terms described in [this file](https://github.com/twilio/twilio-microvisor-hal-stm32u5/blob/main/LICENSE-STM32CubeU5.md).
 

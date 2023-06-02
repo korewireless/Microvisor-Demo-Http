@@ -1,9 +1,9 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 3.0.3
- * Copyright © 2023, Twilio
- * Licence: Apache 2.0
+ * Version 3.1.0
+ * Copyright © 2023, KORE Wireless
+ * Licence: MIT
  *
  */
 #include "main.h"
@@ -27,8 +27,8 @@ bool log_uart_init(void) {
 
     // Initialize the UART
     if (HAL_UART_Init(&log_uart) != HAL_OK) {
-      server_error("Could not enable logging UART");
-      return false;
+        server_error("Could not enable logging UART");
+        return false;
     }
 
     server_log("UART logging enabled");
