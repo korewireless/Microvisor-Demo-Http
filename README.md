@@ -1,5 +1,7 @@
 # Microvisor HTTP Demo 3.1.0
 
+**Note** Twilio IoT is now part of KORE Wireless. This repo will shortly be moved to a new home under KORE Wireless.
+
 This repo provides a basic demonstration of a user application capable of working with Microvisor’s HTTP communications system calls. It has no hardware dependencies beyond the Twilio Microvisor Nucleo Development Board.
 
 It is based on the [FreeRTOS](https://freertos.org/) real-time operating system and which will run on the “non-secure” side of Microvisor. FreeRTOS is included as a submodule.
