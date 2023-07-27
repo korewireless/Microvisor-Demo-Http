@@ -193,3 +193,5 @@ The SDK makes used of code © 2021, STMicroelectronics and affiliates. This code
 The SDK makes use [ARM CMSIS](https://github.com/ARM-software/CMSIS_5) © 2004, ARM. It is licensed under the terms of the [Apache 2.0 License](./LICENSE).
 
 [FreeRTOS](https://freertos.org/) is © 2021, Amazon Web Services, Inc. It is licensed under the terms of the [Apache 2.0 License](./LICENSE).
+
+The Twilio CLI is © 2023, Twilio.
