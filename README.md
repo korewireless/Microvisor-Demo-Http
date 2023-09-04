@@ -1,4 +1,4 @@
-# Microvisor HTTP Demo 3.1.0
+# Microvisor HTTP Demo
 
 This repo provides a basic demonstration of a user application capable of working with Microvisor’s HTTP communications system calls. It has no hardware dependencies beyond the Microvisor Nucleo Development Board.
 
