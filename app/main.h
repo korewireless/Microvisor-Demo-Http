@@ -35,11 +35,6 @@
 #include "network.h"
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 /*
  * CONSTANTS
  */
@@ -55,11 +50,6 @@ extern "C" {
 #define     CHANNEL_KILL_PERIOD_MS      15000
 
 #define     MAX_HEADERS_OUTPUT          10
-
-
-#ifdef __cplusplus
-}
-#endif
 
 
 #endif      // _MAIN_H_

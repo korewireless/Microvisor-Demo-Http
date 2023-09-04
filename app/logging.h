@@ -10,11 +10,6 @@
 #define LOGGING_H
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 /*
  * CONSTANTS
  */
@@ -29,6 +24,11 @@ extern "C" {
 #define     LOG_BUFFER_SIZE_B                   4096
 
 #define     NET_NC_BUFFER_SIZE_R                8
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 /*

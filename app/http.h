@@ -10,17 +10,17 @@
 #define _HTTP_H_
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 /*
  * CONSTANTS
  */
 #define     HTTP_RX_BUFFER_SIZE_B       2560
 #define     HTTP_TX_BUFFER_SIZE_B       512
 #define     HTTP_NT_BUFFER_SIZE_R       8       
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 /*

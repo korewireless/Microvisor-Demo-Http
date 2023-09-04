@@ -1,18 +1,12 @@
 # Microvisor HTTP Demo 3.1.0
 
-**Note** Twilio IoT is now part of KORE Wireless. This repo will shortly be moved to a new home under KORE Wireless.
-
-This repo provides a basic demonstration of a user application capable of working with Microvisor’s HTTP communications system calls. It has no hardware dependencies beyond the Twilio Microvisor Nucleo Development Board.
+This repo provides a basic demonstration of a user application capable of working with Microvisor’s HTTP communications system calls. It has no hardware dependencies beyond the Microvisor Nucleo Development Board.
 
 It is based on the [FreeRTOS](https://freertos.org/) real-time operating system and which will run on the “non-secure” side of Microvisor. FreeRTOS is included as a submodule.
 
 The [ARM CMSIS-RTOS API](https://github.com/ARM-software/CMSIS_5) is used an an intermediary between the application and FreeRTOS to make it easier to swap out the RTOS layer for another should you wish to do so.
 
-The application code files can be found in the [app/](app/) directory. The [ST_Code/](ST_Code/) directory contains required components that are not part of Twilio Microvisor STM32U5 HAL, which this sample accesses as a submodule. The `FreeRTOSConfig.h` and `stm32u5xx_hal_conf.h` configuration files are located in the [config/](config/) directory.
-
-## Release Notes
-
-* 3.0.x requires Microvisor kernel 0.5.0 or above, and [Twilio CLI Microvisor Plugin 0.3.10](https://www.twilio.com/docs/iot/microvisor/the-twilio-cli-microvisor-plugin) or above.
+The application code files can be found in the [app/](app/) directory. The [ST_Code/](ST_Code/) directory contains required components that are not part of the Microvisor STM32U5 HAL, which this sample accesses as a submodule. The `FreeRTOSConfig.h` and `stm32u5xx_hal_conf.h` configuration files are located in the [config/](config/) directory.
 
 ## Actions
 
@@ -27,13 +21,13 @@ The second thread It also emits a “ping” to the Microvisor logger once a sec
 This repo makes uses of git submodules, some of which are nested within other submodules. To clone the repo, run:
 
 ```bash
-git clone https://github.com/TwilioDevEd/microvisor-http-demo.git
+git clone https://github.com/korewireless/Microvisor-Demo-Http.git
 ```
 
 and then:
 
 ```bash
-cd microvisor-http-demo
+cd Microvisor-Demo-Http
 git submodule update --init --recursive
 ```
 
@@ -51,7 +45,7 @@ We recommend following this by deleting your `build` directory.
 
 You will need a Twilio account. [Sign up now if you don’t have one](https://www.twilio.com/try-twilio).
 
-You will also need a Twilio Microvisor Nucleo Development Board.
+You will also need a Microvisor Nucleo Development Board.
 
 ## Software Setup
 
@@ -61,7 +55,7 @@ This project is written in C. At this time, we only support Ubuntu 20.0.4. Users
 
 ### Docker
 
-If you are running on an architecture other than x86/amd64 (such as a Mac with Apple silicon), you will need to override the platform when running docker. This is needed for the Twilio CLI apt package which is x86 only at this time:
+If you are running on an architecture other than x86/amd64 (such as a Mac with Apple silicon), you will need to override the platform when running docker. This is needed for the Twilio CLI `apt`` package which is x86 only at this time:
 
 ```shell
 export DOCKER_DEFAULT_PLATFORM=linux/amd64
@@ -116,7 +110,7 @@ twilio plugins:install @twilio/plugin-microvisor
 
 #### Environment Variables
 
-Running the Twilio CLI and the Microvisor Plugin to upload the built code to the Twilio cloud for subsequent deployment to your Microvisor Nucleo Board uses the following Twilio credentials stored as environment variables. They should be added to your shell profile:
+Running the Twilio CLI and the Microvisor Plugin to upload the built code to the Microvisor cloud for subsequent deployment to your Microvisor Nucleo Board uses the following Twilio credentials stored as environment variables. They should be added to your shell profile:
 
 ```bash
 export TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
