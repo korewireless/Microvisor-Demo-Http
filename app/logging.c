@@ -1,7 +1,7 @@
 /**
  *
  * Microvisor HTTP Communications Demo
- * Version 3.1.0
+ * Version 3.1.1
  * Copyright © 2023, KORE Wireless
  * Licence: MIT
  *
