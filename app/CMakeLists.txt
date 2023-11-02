@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 # Set application data
 set(APP "Microvisor HTTP Demo")
-set(VERSION_NUMBER "3.1.1")
+set(VERSION_NUMBER "3.1.2")
 set(BUILD_NUMBER "1")
 
 message("Building ${APP} ${VERSION_NUMBER} build ${BUILD_NUMBER}")
@@ -25,7 +25,7 @@ add_executable(${PROJECT_NAME}
 # Link built libraries
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC
     ST_Code
-    twilio-microvisor-hal-stm32u5
+    Microvisor-HAL-STM32U5
     FreeRTOS
 )
 
