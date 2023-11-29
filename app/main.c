@@ -65,7 +65,7 @@ extern struct {
  *  @brief The application entry point.
  */
 int main(void) {
-    
+
     // Reset of all peripherals, Initializes the Flash interface and the sys tick.
     HAL_Init();
 
@@ -77,10 +77,10 @@ int main(void) {
 
     // Start the network
     net_open_network();
-    
+
     // Initialize peripherals
     gpio_init();
-    
+
     // Init scheduler
     osKernelInitialize();
 
@@ -105,7 +105,7 @@ int main(void) {
  * @returns The clock value.
  */
 uint32_t SECURE_SystemCoreClockUpdate(void) {
-    
+
     uint32_t clock = 0;
     mvGetHClk(&clock);
     return clock;
@@ -116,7 +116,7 @@ uint32_t SECURE_SystemCoreClockUpdate(void) {
  * @brief System clock configuration.
  */
 static void system_clock_config(void) {
-    
+
     SystemCoreClockUpdate();
     HAL_InitTick(TICK_INT_PRIORITY);
 }
@@ -128,7 +128,7 @@ static void system_clock_config(void) {
  * Used to flash the Nucleo's USER LED, which is on GPIO Pin PA5.
  */
 static void gpio_init(void) {
-    
+
     // Enable GPIO port clock
     __HAL_RCC_GPIOA_CLK_ENABLE();
 
@@ -151,7 +151,7 @@ static void gpio_init(void) {
  * @param  argument: Not used.
  */
 static void task_led(void *argument) {
-    
+
     uint32_t last_tick = 0;
 
     // The task's main loop
@@ -165,7 +165,7 @@ static void task_led(void *argument) {
         } else if (tick - last_tick > LED_PULSE_MS) {
             HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, GPIO_PIN_RESET);
         }
-        
+
         // End of cycle delay
         osDelay(10);
     }
@@ -178,7 +178,7 @@ static void task_led(void *argument) {
  * @param  argument: Not used.
 */
 static void task_http(void *argument) {
-    
+
     uint32_t ping_count = 1;
     uint32_t kill_time = 0;
     uint32_t send_tick = 0;
@@ -209,18 +209,18 @@ static void task_http(void *argument) {
 
         // Process a request's response if indicated by the ISR
         if (received_request) process_http_response();
-        
+
         // Respond to unexpected channel closure
         if (channel_was_closed) {
             enum MvClosureReason reason = 0;
             if (mvGetChannelClosureReason(http_handles.channel, &reason) == MV_STATUS_OKAY) {
                 server_log("Closure reason: %lu", (uint32_t)reason);
             }
-            
+
             channel_was_closed = false;
             do_close_channel = true;
         }
-        
+
         // Use 'kill_time' to force-close an open HTTP channel
         // if it's been left open too long
         if (kill_time > 0 && tick - kill_time > CHANNEL_KILL_PERIOD_MS) {
@@ -236,7 +236,7 @@ static void task_http(void *argument) {
             kill_time = 0;
             http_close_channel();
         }
-        
+
         // End of cycle delay
         osDelay(10);
     }
@@ -247,7 +247,7 @@ static void task_http(void *argument) {
  * @brief Process HTTP response data
  */
 static void process_http_response(void) {
-    
+
     // We have received data via the active HTTP channel so establish
     // an `MvHttpResponseData` record to hold response metadata
     static struct MvHttpResponseData resp_data;
@@ -290,7 +290,7 @@ static void process_http_response(void) {
  * @param n: The number of headers to list.
  */
 static void output_headers(uint32_t n) {
-    
+
     if (n > 0) {
         enum MvStatus status = MV_STATUS_OKAY;
         uint8_t buffer[256];
@@ -311,10 +311,9 @@ static void output_headers(uint32_t n) {
  * @brief Show basic device info.
  */
 static void log_device_info(void) {
-    
+
     uint8_t buffer[35] = { 0 };
     mvGetDeviceId(buffer, 34);
     server_log("Device: %s", buffer);
-    server_log("   App: %s %s", APP_NAME, APP_VERSION);
-    server_log(" Build: %i", BUILD_NUM);
+    server_log("   App: %s %s-%u", APP_NAME, APP_VERSION, BUILD_NUM);
 }
