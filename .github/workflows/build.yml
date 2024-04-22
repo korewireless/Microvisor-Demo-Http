@@ -2,15 +2,13 @@ on:
   push:
   pull_request:
   workflow_dispatch:
-  schedule:
-    - cron: '0 18 * * *'
 jobs:
   build_linux_native:
     name: Build on Linux with native tools
     runs-on: ubuntu-latest
     steps:
     - name: Get application code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'recursive'
     - name: Get Pre-reqs
@@ -18,7 +16,7 @@ jobs:
     - name: Build application code
       run: cmake -S . -B build && cmake --build build
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mv-http-demo-linux-native
         path: ${{ github.workspace }}/build/app/mv-http-demo.*
@@ -27,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Get application code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'recursive'
     - name: Build Docker image
@@ -35,7 +33,7 @@ jobs:
     - name: Build application code
       run: docker run --rm -v $(pwd)/:/home/mvisor/project/ --env BUILD_ONLY=true --name mv-http-lin-dock mv-http-image-lin-dock
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mv-http-demo-linux-docker
         path: ${{ github.workspace }}/build/app/mv-http-demo.*
@@ -47,11 +45,11 @@ jobs:
         shell: wsl-bash {0}
     steps:
     - name: Get WSL
-      uses: Vampire/setup-wsl@v2
+      uses: Vampire/setup-wsl@v3
       with:
         distribution: Ubuntu-20.04
     - name: Get application code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'recursive'
     - name: Get Pre-reqs
@@ -59,7 +57,7 @@ jobs:
     - name: Build code
       run: cmake -S . -B build && cmake --build build
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mv-http-demo-win-wsl
         path: ${{ github.workspace }}/build/app/mv-http-demo.*
@@ -68,7 +66,7 @@ jobs:
     runs-on: macos-latest
     steps:
     - name: Get application code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'recursive'
     - name: Get Docker
@@ -80,7 +78,24 @@ jobs:
     - name: Build code
       run: docker run --rm -v $(pwd)/:/home/mvisor/project/ --env BUILD_ONLY=true --name mv-http-mac-dock mv-http-image-mac-dock
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mv-http-demo-mac-docker
         path: ${{ github.workspace }}/build/app/mv-http-demo.*
+  build_mac_native:
+    name: Build on macOS with native tooling
+    runs-on: macos-latest
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+    - name: Get Pre-reqs
+      run: brew install --cask gcc-arm-embedded
+    - name: Build code
+      run: cmake -S . -B build && cmake --build build
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: mv-clock-demo-mac-native
+        path: ${{ github.workspace }}/build/app/microvisor-http-demo.*
