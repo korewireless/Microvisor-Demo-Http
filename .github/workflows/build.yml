@@ -98,4 +98,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: mv-clock-demo-mac-native
-        path: ${{ github.workspace }}/build/app/microvisor-http-demo.*
+        path: ${{ github.workspace }}/build/app/mv-http-demo.*
