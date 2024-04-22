@@ -180,7 +180,7 @@ You will need to pass the path to the private key to the Twilio CLI Microvisor p
 
 ## Copyright and Licensing
 
-The sample code and Microvisor SDK is © 2023, KORE Wireless. It is licensed under the terms of the [MIT](./LICENSE.md).
+The sample code and Microvisor SDK is © 2024, KORE Wireless. It is licensed under the terms of the [MIT](./LICENSE.md).
 
 The SDK makes used of code © 2021, STMicroelectronics and affiliates. This code is licensed under terms described in [this file](https://github.com/korewireless/Microvisor-HAL-STM32U5/blob/main/LICENSE-STM32CubeU5.md).
 
@@ -188,4 +188,4 @@ The SDK makes use [ARM CMSIS](https://github.com/ARM-software/CMSIS_5) © 2004, 
 
 [FreeRTOS](https://freertos.org/) is © 2021, Amazon Web Services, Inc. It is licensed under the terms of the [Apache 2.0 License](./LICENSE).
 
-The Twilio CLI is © 2023, Twilio.
+The Twilio CLI is © 2024, Twilio.

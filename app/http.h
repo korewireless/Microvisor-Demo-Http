@@ -2,7 +2,7 @@
  *
  * Microvisor HTTP Communications Demo
  *
- * Copyright © 2023, KORE Wireless
+ * Copyright © 2024, KORE Wireless
  * Licence: MIT
  *
  */
@@ -15,7 +15,7 @@
  */
 #define     HTTP_RX_BUFFER_SIZE_B       2560
 #define     HTTP_TX_BUFFER_SIZE_B       512
-#define     HTTP_NT_BUFFER_SIZE_R       8       
+#define     HTTP_NT_BUFFER_SIZE_R       8
 
 
 #ifdef __cplusplus
