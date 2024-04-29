@@ -16,6 +16,12 @@ One thread periodically toggles GPIO A5, which is the user LED on the [Microviso
 
 The second thread It also emits a “ping” to the Microvisor logger once a second. Every 30 seconds it makes a `GET` request to `https://jsonplaceholder.typicode.com/todos/1`, a free API the delivers an object JSON testing.
 
+## Polite Deployment
+
+This code now supports Microvisor polite deployments. Bundles will need to be built with polite deployment enabled. Once such a bundle has been uploaded and deployed, future updates will be handled politely: Microvisor will notify the application, which can choose to apply the staged update when it is no longer performing any critical tasks.
+
+In the case of the demo, this is simulated by setting a FreeRTOS/CMSIS timer which fires 30 seconds later to trigger the application update.
+
 ## Cloning the Repo
 
 This repo makes uses of git submodules, some of which are nested within other submodules. To clone the repo, run:
