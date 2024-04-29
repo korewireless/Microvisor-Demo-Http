@@ -67,8 +67,10 @@ extern struct {
     MvChannelHandle      channel;
 } http_handles;
 
+// Local notification center/emitter handls
 MvNotificationHandle sys_nc_handle;
-MvSystemEventHandle sys_event_handle;
+MvSystemEventHandle sys_emitter_handle;
+
 
 /**
  *  @brief The application entry point.
@@ -377,7 +379,7 @@ static void setup_sys_notification_center(void) {
         .notification_source = MV_SYSTEMNOTIFICATIONSOURCE_UPDATE
     };
 
-    status = mvOpenSystemNotification(&sys_notification_params, &sys_event_handle);
+    status = mvOpenSystemNotification(&sys_notification_params, &sys_emitter_handle);
     do_assert(status == MV_STATUS_OKAY, "Could not enable system notifications");
 
     // Start the notification IRQ
