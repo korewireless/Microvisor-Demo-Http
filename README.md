@@ -1,6 +1,6 @@
 # Microvisor HTTP Demo
 
-[![.github/workflows/build.yml](https://github.com/korewireless/Microvisor-Demo-Weather-Device/actions/workflows/build.yml/badge.svg)](https://github.com/korewireless/Microvisor-Demo-Weather-Device/actions/workflows/build.yml)
+[![.github/workflows/build.yml](https://github.com/korewireless/Microvisor-Demo-Http/actions/workflows/build.yml/badge.svg)](https://github.com/korewireless/Microvisor-Demo-Http/actions/workflows/build.yml)
 
 This repo provides a basic demonstration of a user application capable of working with Microvisor’s HTTP communications system calls. It has no hardware dependencies beyond the Microvisor Nucleo Development Board.
 
