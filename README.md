@@ -1,5 +1,7 @@
 # Microvisor HTTP Demo
 
+[![.github/workflows/build.yml](https://github.com/korewireless/Microvisor-Demo-Http/actions/workflows/build.yml/badge.svg)](https://github.com/korewireless/Microvisor-Demo-Http/actions/workflows/build.yml)
+
 This repo provides a basic demonstration of a user application capable of working with Microvisor’s HTTP communications system calls. It has no hardware dependencies beyond the Microvisor Nucleo Development Board.
 
 It is based on the [FreeRTOS](https://freertos.org/) real-time operating system and which will run on the “non-secure” side of Microvisor. FreeRTOS is included as a submodule.
@@ -15,6 +17,12 @@ The code creates and runs two threads.
 One thread periodically toggles GPIO A5, which is the user LED on the [Microvisor Nucleo Development Board](https://www.twilio.com/docs/iot/microvisor/microvisor-nucleo-development-board).
 
 The second thread It also emits a “ping” to the Microvisor logger once a second. Every 30 seconds it makes a `GET` request to `https://jsonplaceholder.typicode.com/todos/1`, a free API the delivers an object JSON testing.
+
+## Polite Deployment
+
+This code now supports Microvisor polite deployments. Bundles will need to be built with polite deployment enabled. Once such a bundle has been uploaded and deployed, future updates will be handled politely: Microvisor will notify the application, which can choose to apply the staged update when it is no longer performing any critical tasks.
+
+In the case of the demo, this is simulated by setting a FreeRTOS/CMSIS timer which fires 30 seconds later to trigger the application update.
 
 ## Cloning the Repo
 

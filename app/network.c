@@ -82,12 +82,12 @@ static void net_setup_notification_center(void) {
 
     if (net_handles.notification == 0) {
         // Clear the notification store
-        memset((void *)net_notification_buffer, 0xff, sizeof(net_notification_buffer));
+        memset((void*)net_notification_buffer, 0xff, sizeof(net_notification_buffer));
 
         // Configure a notification center for network-centric notifications
         static struct MvNotificationSetup net_notification_config = {
-            .irq = TIM1_BRK_IRQn,
-            .buffer = (struct MvNotification *)net_notification_buffer,
+            .irq = TIM2_IRQn,
+            .buffer = (struct MvNotification*)net_notification_buffer,
             .buffer_size = sizeof(net_notification_buffer)
         };
 
@@ -97,8 +97,8 @@ static void net_setup_notification_center(void) {
         do_assert(status == MV_STATUS_OKAY, "Could not start network NC");
 
         // Start the notification IRQ
-        NVIC_ClearPendingIRQ(TIM1_BRK_IRQn);
-        NVIC_EnableIRQ(TIM1_BRK_IRQn);
+        NVIC_ClearPendingIRQ(TIM2_IRQn);
+        NVIC_EnableIRQ(TIM2_IRQn);
         server_log("Network NC handle: %lu", (uint32_t)net_handles.notification);
     }
 }
@@ -118,7 +118,7 @@ MvNetworkHandle net_get_handle(void) {
 /**
  * @brief Network notification ISR.
  */
-void TIM1_BRK_IRQHandler(void) {
+void TIM2_IRQHandler(void) {
 
     // Network notifications interrupt service handler
     // Add your own notification processing code here

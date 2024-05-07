@@ -20,6 +20,8 @@ static void task_http(void *argument);
 static void process_http_response(void);
 static void log_device_info(void);
 static void output_headers(uint32_t n);
+static void setup_sys_notification_center(void);
+static void do_polite_deploy(void *arg);
 
 
 /*
@@ -49,6 +51,12 @@ static const osThreadAttr_t attributes_thread_http = {
  */
 volatile bool   received_request = false;
 volatile bool   channel_was_closed = false;
+volatile bool   polite_deploy = false;
+
+// Central store for HTTP request management notification records.
+// Holds HTTP_NT_BUFFER_SIZE_R records at a time -- each record is 16 bytes in size.
+static volatile struct MvNotification sys_notification_center[4] __attribute__((aligned(8)));
+static volatile uint32_t current_notification_index = 0;
 
 /**
  * These variables are defined in `http.c`
@@ -59,6 +67,9 @@ extern struct {
     MvChannelHandle      channel;
 } http_handles;
 
+// Local notification center/emitter handls
+MvNotificationHandle sys_nc_handle;
+MvSystemEventHandle sys_emitter_handle;
 
 
 /**
@@ -74,6 +85,9 @@ int main(void) {
 
     // Get the Device ID and build number
     log_device_info();
+
+    // Configure system-level notification
+    setup_sys_notification_center();
 
     // Start the network
     net_open_network();
@@ -150,13 +164,15 @@ static void gpio_init(void) {
  *
  * @param  argument: Not used.
  */
-static void task_led(void *argument) {
+static void task_led(void* argument) {
 
     uint32_t last_tick = 0;
+    osTimerId_t polite_timer;
 
     // The task's main loop
     while (1) {
         // Periodically update the display and flash the USER LED
+
         // Get the ms timer value
         uint32_t tick = HAL_GetTick();
         if (tick - last_tick > LED_PAUSE_MS) {
@@ -164,6 +180,24 @@ static void task_led(void *argument) {
             HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, GPIO_PIN_SET);
         } else if (tick - last_tick > LED_PULSE_MS) {
             HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, GPIO_PIN_RESET);
+        }
+
+        // FROM 3.2.0
+        // Check if the polite deployment flag has been set
+        // via a Microvisor system notification
+        if (polite_deploy) {
+            server_log("Polite deployment notification issued");
+            polite_deploy = false;
+
+            // Set up a 30s timer to trigger the update
+            // NOTE In a real-world application, you would apply the update
+            //      see `do_polite_deploy()` as soon as any current critical task
+            //      completes. Here we just demo the process using a HAL timer.
+            polite_timer = osTimerNew(do_polite_deploy, osTimerOnce, NULL, NULL);
+            const uint32_t timer_delay_s = 30;
+            if (polite_timer != NULL && osTimerStart(polite_timer, timer_delay_s * 1000) == osOK) {
+                server_log("Update will install in %lu seconds", timer_delay_s);
+            }
         }
 
         // End of cycle delay
@@ -183,7 +217,6 @@ static void task_http(void *argument) {
     uint32_t kill_time = 0;
     uint32_t send_tick = 0;
     bool do_close_channel = false;
-    enum MvStatus result = MV_STATUS_OKAY;
 
     // Set up channel notifications
     http_setup_notification_center();
@@ -198,8 +231,7 @@ static void task_http(void *argument) {
 
             // No channel open?
             if (http_handles.channel == 0 && http_open_channel()) {
-                result = http_send_request(ping_count);
-                if (result != 0) do_close_channel = true;
+                if (http_send_request(ping_count) != 0) do_close_channel = true;
                 kill_time = tick;
             } else {
                 server_error("Channel handle not zero");
@@ -276,7 +308,7 @@ static void process_http_response(void) {
                 server_error("HTTP status code: %lu", resp_data.status_code);
             }
         } else {
-            server_error("Request failed. Status: %i", resp_data.result);;
+            server_error("Request failed. Status: %i", resp_data.result);
         }
     } else {
         server_error("Response data read failed. Status: %i", status);
@@ -317,3 +349,94 @@ static void log_device_info(void) {
     server_log("Device: %s", buffer);
     server_log("   App: %s %s-%u", APP_NAME, APP_VERSION, BUILD_NUM);
 }
+
+
+/**
+ * @brief Configure the System Notification Center.
+ */
+static void setup_sys_notification_center(void) {
+
+    // Clear the notification store
+    memset((void*)sys_notification_center, 0x00, sizeof(sys_notification_center));
+
+    // Configure a notification center for system notifications
+    static struct MvNotificationSetup sys_notification_setup = {
+        .irq = TIM1_BRK_IRQn,
+        .buffer = (struct MvNotification*)sys_notification_center,
+        .buffer_size = sizeof(sys_notification_center)
+    };
+
+    // Ask Microvisor to establish the notification center
+    // and confirm that it has accepted the request
+    enum MvStatus status = mvSetupNotifications(&sys_notification_setup, &sys_nc_handle);
+    do_assert(status == MV_STATUS_OKAY, "Could not set up sys NC");
+    server_log("HTTP NC handle: %lu", (uint32_t)sys_nc_handle);
+
+    // Tell Microvisor to use the new notification center for system notifications
+    const struct MvOpenSystemNotificationParams sys_notification_params = {
+        .notification_handle = sys_nc_handle,
+        .notification_tag = 0,
+        .notification_source = MV_SYSTEMNOTIFICATIONSOURCE_UPDATE
+    };
+
+    status = mvOpenSystemNotification(&sys_notification_params, &sys_emitter_handle);
+    do_assert(status == MV_STATUS_OKAY, "Could not enable system notifications");
+
+    // Start the notification IRQ
+    NVIC_ClearPendingIRQ(TIM1_BRK_IRQn);
+    NVIC_EnableIRQ(TIM1_BRK_IRQn);
+}
+
+
+/**
+ * @brief A CMSIS/FreeRTOS timer callback function.
+ *
+ * This is called when the polite deployment timer (see `task_led()`) fires.
+ * It tells Microvisor to apply the application update that has previously
+ * been signalled as ready to be deployed.
+ *
+ * `mvRestart()` should cause the application to be torn down and restarted,
+ * but it's important to check the returned value in case Microvisor was not
+ * able to perform the restart for some reason.
+ *
+ * @param arg: Pointer to and argument value passed by the timer controller.
+ *             Unused here.
+ */
+static void do_polite_deploy(void* arg) {
+
+    enum MvStatus status = mvRestart(MV_RESTARTMODE_AUTOAPPLYUPDATE);
+    if (status != MV_STATUS_OKAY) {
+        server_error("Could not apply update (%lu)", (uint32_t)status);
+    }
+}
+
+
+/**
+ * @brief The System Notification Center interrupt handler.
+ *
+ * This is called by Microvisor -- we need to check for key events
+ * such as polite deployment.
+ */
+void TIM1_BRK_IRQHandler(void) {
+
+    // Check for a suitable event: readable data in the channel
+    bool got_notification = false;
+    volatile struct MvNotification notification = sys_notification_center[current_notification_index];
+    if (notification.event_type == MV_EVENTTYPE_UPDATEDOWNLOADED) {
+        // Flag we need to access received data and to close the HTTP channel
+        // when we're back in the main loop. This lets us exit the ISR quickly.
+        // We should not make Microvisor System Calls in the ISR.
+        polite_deploy = true;
+        got_notification = true;
+    }
+
+    if (got_notification) {
+        // Point to the next record to be written
+        current_notification_index = (current_notification_index + 1) % HTTP_NT_BUFFER_SIZE_R;
+
+        // Clear the current notifications event
+        // See https://www.twilio.com/docs/iot/microvisor/microvisor-notifications#buffer-overruns
+        notification.event_type = 0;
+    }
+}
+

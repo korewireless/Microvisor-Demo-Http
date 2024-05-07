@@ -171,7 +171,7 @@ enum MvStatus http_send_request(uint32_t item_number) {
     // Issue the request -- and check its status
     enum MvStatus status = mvSendHttpRequest(http_handles.channel, &request_config);
     if (status == MV_STATUS_OKAY) {
-        server_log("Request sent to Twilio");
+        server_log("Request sent to Microvisor Cloud");
     } else if (status == MV_STATUS_CHANNELCLOSED) {
         server_error("HTTP channel %lu already closed", (uint32_t)http_handles.channel);
     } else {
@@ -215,4 +215,4 @@ void TIM8_BRK_IRQHandler(void) {
         // See https://www.twilio.com/docs/iot/microvisor/microvisor-notifications#buffer-overruns
         notification.event_type = 0;
     }
- }
+}
