@@ -123,7 +123,7 @@ void http_setup_notification_center(void) {
     // Start the notification IRQ
     NVIC_ClearPendingIRQ(TIM8_BRK_IRQn);
     NVIC_EnableIRQ(TIM8_BRK_IRQn);
-    server_log("HTTP NC handle: %lu", (uint32_t)http_handles.notification);
+    server_log("HTTP Notification Center handle: %lu", (uint32_t)http_handles.notification);
 }
 
 
@@ -152,7 +152,7 @@ enum MvStatus http_send_request(uint32_t item_number) {
     struct MvHttpHeader hdrs[] = {};
     struct MvHttpRequest request_config = {
         .method = {
-            .data = (uint8_t *)verb,
+            .data = (const uint8_t *)verb,
             .length = strlen(verb)
         },
         .url = {
@@ -162,7 +162,7 @@ enum MvStatus http_send_request(uint32_t item_number) {
         .num_headers = 0,
         .headers = hdrs,
         .body = {
-            .data = (uint8_t *)body,
+            .data = (const uint8_t *)body,
             .length = strlen(body)
         },
         .timeout_ms = 10000

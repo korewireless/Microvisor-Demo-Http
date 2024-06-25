@@ -28,7 +28,6 @@ static struct {
 // Central store for network management notification records.
 // Holds 'NET_NC_BUFFER_SIZE_R' records at a time -- each record is 16 bytes in size.
 static volatile struct MvNotification net_notification_buffer[NET_NC_BUFFER_SIZE_R] __attribute__((aligned(8)));
-static volatile uint32_t current_notification_idx = 0;
 
 
 /**
@@ -99,7 +98,7 @@ static void net_setup_notification_center(void) {
         // Start the notification IRQ
         NVIC_ClearPendingIRQ(TIM2_IRQn);
         NVIC_EnableIRQ(TIM2_IRQn);
-        server_log("Network NC handle: %lu", (uint32_t)net_handles.notification);
+        server_log("Network Notification Center handle: %lu", (uint32_t)net_handles.notification);
     }
 }
 

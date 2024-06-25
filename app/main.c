@@ -144,7 +144,7 @@ static void system_clock_config(void) {
 static void gpio_init(void) {
 
     // Enable GPIO port clock
-    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE()
 
     // Configure GPIO pin output Level
     HAL_GPIO_WritePin(LED_GPIO_BANK, LED_GPIO_PIN, GPIO_PIN_RESET);
@@ -370,7 +370,7 @@ static void setup_sys_notification_center(void) {
     // and confirm that it has accepted the request
     enum MvStatus status = mvSetupNotifications(&sys_notification_setup, &sys_nc_handle);
     do_assert(status == MV_STATUS_OKAY, "Could not set up sys NC");
-    server_log("HTTP NC handle: %lu", (uint32_t)sys_nc_handle);
+    server_log("System Notification Center handle: %lu", (uint32_t)sys_nc_handle);
 
     // Tell Microvisor to use the new notification center for system notifications
     const struct MvOpenSystemNotificationParams sys_notification_params = {
