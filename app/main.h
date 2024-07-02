@@ -33,6 +33,7 @@
 #include "uart_logging.h"
 #include "http.h"
 #include "network.h"
+#include "generic.h"
 
 
 /*
@@ -46,10 +47,11 @@
 #define     LED_PAUSE_MS                2000
 #define     LED_PULSE_MS                100
 
-#define     REQUEST_SEND_PERIOD_MS      30000
+#define     REQUEST_SEND_PERIOD_MS      45000
 #define     CHANNEL_KILL_PERIOD_MS      15000
+#define     SYS_LED_DISABLE_MS          58000
 
-#define     MAX_HEADERS_OUTPUT          10
+#define     MAX_HEADERS_OUTPUT          24
 
 
 #endif      // _MAIN_H_

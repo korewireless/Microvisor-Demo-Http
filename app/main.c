@@ -7,67 +7,48 @@
  *
  */
 #include "main.h"
-#include "app_version.h"
 
 
 /*
  * STATIC PROTOTYPES
  */
-static void system_clock_config(void);
 static void gpio_init(void);
+static void start_app(void);
 static void task_led(void *argument);
 static void task_http(void *argument);
 static void process_http_response(void);
-static void log_device_info(void);
 static void output_headers(uint32_t n);
 static void setup_sys_notification_center(void);
 static void do_polite_deploy(void *arg);
+static void do_clear_led(void* arg);
 
 
 /*
  * GLOBALS
- */
-
-// This is the CMSIS/FreeRTOS thread task that flashed the USER LED
-static osThreadId_t thread_led;
-static const osThreadAttr_t attributes_thread_led = {
-    .name = "LEDTask",
-    .stack_size = 2048,
-    .priority = (osPriority_t) osPriorityNormal
-};
-
-// This is the CMSIS/FreeRTOS thread task that sends HTTP requests
-static osThreadId_t thread_http;
-static const osThreadAttr_t attributes_thread_http = {
-    .name = "HTTPTask",
-    .stack_size = 8192,
-    .priority = (osPriority_t) osPriorityNormal
-};
-
-/**
- *  Theses variables may be changed by interrupt handler code,
- *  so we mark them as `volatile` to ensure compiler optimization
- *  doesn't render them immutable at runtime
+ *
+ * Theses variables may be changed by interrupt handler code,
+ * so we mark them as `volatile` to ensure compiler optimization
+ * doesn't render them immutable at runtime
  */
 volatile bool   received_request = false;
 volatile bool   channel_was_closed = false;
 volatile bool   polite_deploy = false;
+         bool   reset_count = false;
 
 // Central store for HTTP request management notification records.
 // Holds HTTP_NT_BUFFER_SIZE_R records at a time -- each record is 16 bytes in size.
-static volatile struct MvNotification sys_notification_center[4] __attribute__((aligned(8)));
+static struct MvNotification sys_notification_center[4] __attribute__((aligned(8)));
+// Modified in ISR
 static volatile uint32_t current_notification_index = 0;
 
-/**
- * These variables are defined in `http.c`
- */
+// These variables are defined in `http.c`
 extern struct {
     MvNotificationHandle notification;
     MvNetworkHandle      network;
     MvChannelHandle      channel;
 } http_handles;
 
-// Local notification center/emitter handls
+// Local notification center/emitter handles
 MvNotificationHandle sys_nc_handle;
 MvSystemEventHandle sys_emitter_handle;
 
@@ -83,8 +64,14 @@ int main(void) {
     // Configure the system clock
     system_clock_config();
 
+    // Initialize peripherals
+    gpio_init();
+
     // Get the Device ID and build number
     log_device_info();
+
+    // What happened before?
+    show_wake_reason();
 
     // Configure system-level notification
     setup_sys_notification_center();
@@ -92,47 +79,14 @@ int main(void) {
     // Start the network
     net_open_network();
 
-    // Initialize peripherals
-    gpio_init();
+    // Set up and start application threads
+    start_app();
 
-    // Init scheduler
-    osKernelInitialize();
-
-    // Create the FreeRTOS thread(s)
-    thread_http = osThreadNew(task_http, NULL, &attributes_thread_http);
-    thread_led  = osThreadNew(task_led,  NULL, &attributes_thread_led);
-
-    // Start the scheduler
-    osKernelStart();
-
-    // We should never get here as control is now taken by the scheduler,
+    // We should never get here as control is now taken by the FreeRTOS scheduler,
     // but just in case...
     while (1) {
         // NOP
     }
-}
-
-
-/**
- * @brief Get the MV clock value.
- *
- * @returns The clock value.
- */
-uint32_t SECURE_SystemCoreClockUpdate(void) {
-
-    uint32_t clock = 0;
-    mvGetHClk(&clock);
-    return clock;
-}
-
-
-/**
- * @brief System clock configuration.
- */
-static void system_clock_config(void) {
-
-    SystemCoreClockUpdate();
-    HAL_InitTick(TICK_INT_PRIORITY);
 }
 
 
@@ -160,14 +114,49 @@ static void gpio_init(void) {
 
 
 /**
+ * @brief Initialize the app's FreeRTOS threads and start the scheduler.
+ */
+static void start_app(void) {
+
+    // This is the CMSIS/FreeRTOS thread task that flashed the USER LED
+    const osThreadAttr_t attributes_thread_led = {
+        .name = "LEDTask",
+        .stack_size = 2048,
+        .priority = osPriorityNormal
+    };
+
+    // This is the CMSIS/FreeRTOS thread task that sends HTTP requests
+    const osThreadAttr_t attributes_thread_http = {
+        .name = "HTTPTask",
+        .stack_size = 16384,
+        .priority = osPriorityNormal
+    };
+
+    // Init scheduler
+    osKernelInitialize();
+
+    // Create the FreeRTOS thread(s)
+    osThreadNew(task_http, NULL, &attributes_thread_http);
+    osThreadNew(task_led,  NULL, &attributes_thread_led);
+
+    // Start the scheduler
+    osKernelStart();
+}
+
+
+/**
  * @brief Function implementing the LED-flash task thread.
  *
- * @param  argument: Not used.
+ * @param argument: Not used.
  */
 static void task_led(void* argument) {
 
     uint32_t last_tick = 0;
     osTimerId_t polite_timer;
+
+    // FROM 3.3.0
+    osTimerId_t sys_led_timer = osTimerNew(do_clear_led, osTimerOnce, NULL, NULL);
+    if (sys_led_timer != NULL) osTimerStart(sys_led_timer, 59 * 1000);
 
     // The task's main loop
     while (1) {
@@ -209,16 +198,16 @@ static void task_led(void* argument) {
 /**
  * @brief Function implementing the FreeRTOS HTTP task thread.
  *
- * @param  argument: Not used.
+ * @param argument: Not used.
 */
 static void task_http(void *argument) {
 
     uint32_t ping_count = 1;
     uint32_t kill_time = 0;
-    uint32_t send_tick = 0;
+    uint32_t send_tick = HAL_GetTick() - REQUEST_SEND_PERIOD_MS;
     bool do_close_channel = false;
 
-    // Set up channel notifications
+    // Set up HTTP notifications
     http_setup_notification_center();
 
     // Run the thread's main loop
@@ -269,6 +258,13 @@ static void task_http(void *argument) {
             http_close_channel();
         }
 
+        // Reached the end of the items available from the API
+        // so reset the counter and start again
+        if (reset_count) {
+            reset_count = false;
+            ping_count = 1;
+        }
+
         // End of cycle delay
         osDelay(10);
     }
@@ -304,6 +300,10 @@ static void process_http_response(void) {
                 } else {
                     server_error("HTTP response body read status %i", status);
                 }
+            } else if (resp_data.status_code == 404) {
+                // Reached the end of available items, so reset the counter
+                reset_count = true;
+                server_log("Resetting ping count");
             } else {
                 server_error("HTTP status code: %lu", resp_data.status_code);
             }
@@ -319,35 +319,22 @@ static void process_http_response(void) {
 /**
  * @brief Output all received headers.
  *
- * @param n: The number of headers to list.
+ * @param num_headers: The number of headers to list.
  */
-static void output_headers(uint32_t n) {
+static void output_headers(uint32_t num_headers) {
 
-    if (n > 0) {
-        enum MvStatus status = MV_STATUS_OKAY;
-        uint8_t buffer[256];
-        for (uint32_t i = 0 ; i < n ; ++i) {
+    static uint8_t buffer[256] = {0};
+
+    if (num_headers > 0) {
+        for (uint32_t i = 0 ; i < num_headers ; ++i) {
             memset((void *)buffer, 0x00, 256);
-            status = mvReadHttpResponseHeader(http_handles.channel, i, buffer, 255);
-            if (status == MV_STATUS_OKAY) {
-                server_log("Header %lu. %s", i + 1, buffer);
+            if (mvReadHttpResponseHeader(http_handles.channel, i, buffer, 255) == MV_STATUS_OKAY) {
+                server_log("Header %02lu. %s", i + 1, buffer);
             } else {
                 server_error("Could not read header %lu", i + 1);
             }
         }
     }
-}
-
-
-/**
- * @brief Show basic device info.
- */
-static void log_device_info(void) {
-
-    uint8_t buffer[35] = { 0 };
-    mvGetDeviceId(buffer, 34);
-    server_log("Device: %s", buffer);
-    server_log("   App: %s %s-%u", APP_NAME, APP_VERSION, BUILD_NUM);
 }
 
 
@@ -412,6 +399,22 @@ static void do_polite_deploy(void* arg) {
 
 
 /**
+ * @brief A CMSIS/FreeRTOS timer callback function.
+ *
+ * This is called when the sys led timer (see `task_led()`) fires.
+ * It tells Microvisor to disable the system LED
+ *
+ * @param arg: Pointer to and argument value passed by the timer controller.
+ *             Unused here.
+ */
+static void do_clear_led(void* arg) {
+
+    control_system_led(false);
+    server_log("System LED disabled");
+}
+
+
+/**
  * @brief The System Notification Center interrupt handler.
  *
  * This is called by Microvisor -- we need to check for key events
@@ -421,7 +424,7 @@ void TIM1_BRK_IRQHandler(void) {
 
     // Check for a suitable event: readable data in the channel
     bool got_notification = false;
-    volatile struct MvNotification notification = sys_notification_center[current_notification_index];
+    struct MvNotification notification = sys_notification_center[current_notification_index];
     if (notification.event_type == MV_EVENTTYPE_UPDATEDOWNLOADED) {
         // Flag we need to access received data and to close the HTTP channel
         // when we're back in the main loop. This lets us exit the ISR quickly.

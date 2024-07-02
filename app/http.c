@@ -22,10 +22,11 @@ struct {
 
 // Central store for HTTP request management notification records.
 // Holds HTTP_NT_BUFFER_SIZE_R records at a time -- each record is 16 bytes in size.
-static volatile struct MvNotification http_notification_center[HTTP_NT_BUFFER_SIZE_R] __attribute__((aligned(8)));
+static struct MvNotification http_notification_center[HTTP_NT_BUFFER_SIZE_R] __attribute__((aligned(8)));
+// Modified in ISR
 static volatile uint32_t current_notification_index = 0;
 
-// Defined in `main.c`
+// Defined in `main.c`, modified in ISR
 extern volatile bool received_request;
 extern volatile bool channel_was_closed;
 
@@ -38,8 +39,8 @@ extern volatile bool channel_was_closed;
 bool http_open_channel(void) {
 
     // Set up the HTTP channel's multi-use send and receive buffers
-    static volatile uint8_t http_rx_buffer[HTTP_RX_BUFFER_SIZE_B] __attribute__((aligned(512)));
-    static volatile uint8_t http_tx_buffer[HTTP_TX_BUFFER_SIZE_B] __attribute__((aligned(512)));
+    static uint8_t http_rx_buffer[HTTP_RX_BUFFER_SIZE_B] __attribute__((aligned(512)));
+    static uint8_t http_tx_buffer[HTTP_TX_BUFFER_SIZE_B] __attribute__((aligned(512)));
 
     // Get the network channel handle.
     // NOTE This is set in `logging.c` which puts the network in place
@@ -49,7 +50,7 @@ bool http_open_channel(void) {
     server_log("Network handle: %lu", (uint32_t)http_handles.network);
 
     // Configure the required data channel
-    struct MvOpenChannelParams channel_config = {
+    const struct MvOpenChannelParams channel_config = {
         .version = 1,
         .v1 = {
             .notification_handle = http_handles.notification,
@@ -109,7 +110,7 @@ void http_setup_notification_center(void) {
     memset((void *)http_notification_center, 0x00, sizeof(http_notification_center));
 
     // Configure a notification center for network-centric notifications
-    static struct MvNotificationSetup http_notification_setup = {
+    const struct MvNotificationSetup http_notification_setup = {
         .irq = TIM8_BRK_IRQn,
         .buffer = (struct MvNotification *)http_notification_center,
         .buffer_size = sizeof(http_notification_center)
@@ -142,21 +143,21 @@ enum MvStatus http_send_request(uint32_t item_number) {
         return http_send_request(item_number);
     }
 
-    server_log("Sending HTTP request");
+    server_log("Preparing HTTP request");
 
     // Set up the request
     const char verb[] = "GET";
     const char body[] = "";
     char url[46] = "";
     sprintf(url, "https://jsonplaceholder.typicode.com/todos/%lu", item_number);
-    struct MvHttpHeader hdrs[] = {};
-    struct MvHttpRequest request_config = {
+    const struct MvHttpHeader hdrs[] = {};
+    const struct MvHttpRequest request_config = {
         .method = {
             .data = (const uint8_t *)verb,
             .length = strlen(verb)
         },
         .url = {
-            .data = (uint8_t *)url,
+            .data = (const uint8_t *)url,
             .length = strlen(url)
         },
         .num_headers = 0,
@@ -192,7 +193,7 @@ void TIM8_BRK_IRQHandler(void) {
 
     // Check for a suitable event: readable data in the channel
     bool got_notification = false;
-    volatile struct MvNotification notification = http_notification_center[current_notification_index];
+    struct MvNotification notification = http_notification_center[current_notification_index];
     if (notification.event_type == MV_EVENTTYPE_CHANNELDATAREADABLE) {
         // Flag we need to access received data and to close the HTTP channel
         // when we're back in the main loop. This lets us exit the ISR quickly.
