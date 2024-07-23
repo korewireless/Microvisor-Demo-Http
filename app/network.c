@@ -27,7 +27,7 @@ static struct {
 
 // Central store for network management notification records.
 // Holds 'NET_NC_BUFFER_SIZE_R' records at a time -- each record is 16 bytes in size.
-static  struct MvNotification net_notification_buffer[NET_NC_BUFFER_SIZE_R] __attribute__((aligned(8)));
+static struct MvNotification net_notification_buffer[NET_NC_BUFFER_SIZE_R] __attribute__((aligned(8)));
 
 
 /**

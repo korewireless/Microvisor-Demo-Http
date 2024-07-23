@@ -51,7 +51,7 @@
 #define     CHANNEL_KILL_PERIOD_MS      15000
 #define     SYS_LED_DISABLE_MS          58000
 
-#define     MAX_HEADERS_OUTPUT          24
+#define     MAX_HEADERS_OUTPUT          16
 
 
 #endif      // _MAIN_H_

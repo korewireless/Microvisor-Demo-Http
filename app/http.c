@@ -56,9 +56,9 @@ bool http_open_channel(void) {
             .notification_handle = http_handles.notification,
             .notification_tag    = USER_TAG_HTTP_OPEN_CHANNEL,
             .network_handle      = http_handles.network,
-            .receive_buffer      = (uint8_t*)http_rx_buffer,
+            .receive_buffer      = http_rx_buffer,
             .receive_buffer_len  = sizeof(http_rx_buffer),
-            .send_buffer         = (uint8_t*)http_tx_buffer,
+            .send_buffer         = http_tx_buffer,
             .send_buffer_len     = sizeof(http_tx_buffer),
             .channel_type        = MV_CHANNELTYPE_HTTP,
             .endpoint            = {

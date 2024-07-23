@@ -21,7 +21,7 @@ static void post_log(bool is_err, const char* format_string, va_list args);
  * GLOBALS
  */
 // Entities for Microvisor application logging
-static uint8_t log_buffer[LOG_BUFFER_SIZE_B] __attribute__((aligned(512))) = {0};
+static uint8_t  log_buffer[LOG_BUFFER_SIZE_B] __attribute__((aligned(512))) = {0};
 static uint32_t log_state = USER_HANDLE_LOGGING_OFF;
 
 // Entities for local serial logging

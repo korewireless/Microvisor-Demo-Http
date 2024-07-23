@@ -66,6 +66,7 @@ int main(void) {
 
     // Initialize peripherals
     gpio_init();
+    control_system_led(true);
 
     // Get the Device ID and build number
     log_device_info();
@@ -152,9 +153,10 @@ static void start_app(void) {
 static void task_led(void* argument) {
 
     uint32_t last_tick = 0;
-    osTimerId_t polite_timer;
+    osTimerId_t polite_timer = NULL;
 
     // FROM 3.3.0
+    // Set a timer to turn off the System LED approx. 60s after boot
     osTimerId_t sys_led_timer = osTimerNew(do_clear_led, osTimerOnce, NULL, NULL);
     if (sys_led_timer != NULL) osTimerStart(sys_led_timer, 59 * 1000);
 
@@ -349,7 +351,7 @@ static void setup_sys_notification_center(void) {
     // Configure a notification center for system notifications
     static struct MvNotificationSetup sys_notification_setup = {
         .irq = TIM1_BRK_IRQn,
-        .buffer = (struct MvNotification*)sys_notification_center,
+        .buffer = sys_notification_center,
         .buffer_size = sizeof(sys_notification_center)
     };
 
