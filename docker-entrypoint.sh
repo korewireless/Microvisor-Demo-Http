@@ -3,7 +3,7 @@ set -e
 
 cd $(dirname $0)
 
-[ -d build ] && rm -rf build
+rm -rf build
 
 if [[ -n "${BUILD_ONLY}" ]]; then
     # Build only
