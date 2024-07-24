@@ -1,6 +1,6 @@
 /**
  *
- * Microvisor HTTP Communications Demo
+ * Microvisor C Demos
  *
  * Copyright © 2024, KORE Wireless
  * Licence: MIT

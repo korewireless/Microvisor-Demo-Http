@@ -14,7 +14,7 @@
  */
 // Central store for Microvisor resource handles used in this code.
 // See `https://www.twilio.com/docs/iot/microvisor/syscalls#handles`
-struct {
+static struct {
     MvNotificationHandle notification;
     MvNetworkHandle      network;
     MvChannelHandle      channel;
@@ -23,10 +23,9 @@ struct {
 // Central store for HTTP request management notification records.
 // Holds HTTP_NT_BUFFER_SIZE_R records at a time -- each record is 16 bytes in size.
 static struct MvNotification http_notification_center[HTTP_NT_BUFFER_SIZE_R] __attribute__((aligned(8)));
-// Modified in ISR
 static volatile uint32_t current_notification_index = 0;
 
-// Defined in `main.c`, modified in ISR
+// Defined in `main.c`
 extern volatile bool received_request;
 extern volatile bool channel_was_closed;
 
@@ -130,7 +129,7 @@ void http_setup_notification_center(void) {
     // Ask Microvisor to establish the notification center
     // and confirm that it has accepted the request
     enum MvStatus status = mvSetupNotifications(&http_notification_setup, &http_handles.notification);
-    do_assert(status == MV_STATUS_OKAY, "Could not set up HTTP channel NC");
+    do_assert(status == MV_STATUS_OKAY, "Could not set up HTTP channel Notification Center");
 
     // Start the notification IRQ
     NVIC_ClearPendingIRQ(TIM8_BRK_IRQn);
@@ -183,7 +182,7 @@ enum MvStatus http_send_request(uint32_t item_number) {
     // Issue the request -- and check its status
     enum MvStatus status = mvSendHttpRequest(http_handles.channel, &request_config);
     if (status == MV_STATUS_OKAY) {
-        server_log("Request sent to Microvisor Cloud");
+        server_log("Request sent to the Microvisor Cloud");
     } else if (status == MV_STATUS_CHANNELCLOSED) {
         server_error("HTTP channel %lu already closed", (uint32_t)http_handles.channel);
     } else {

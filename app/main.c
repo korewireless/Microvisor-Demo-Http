@@ -207,7 +207,6 @@ static void task_http(void *argument) {
 
     // Run the thread's main loop
     while (1) {
-        MvChannelHandle channel_handle = http_get_handle();
         uint32_t tick = HAL_GetTick();
         if (tick - send_tick > REQUEST_SEND_PERIOD_MS) {
             // Display the current count
@@ -215,12 +214,12 @@ static void task_http(void *argument) {
             server_log("Ping %lu", ping_count++);
 
             // No channel open? The try and open a new one
-            if (channel_handle == 0 && http_open_channel()) {
+            if (http_get_handle() == 0 && http_open_channel()) {
                 if (http_send_request(ping_count) != 0) do_close_channel = true;
                 kill_time = tick;
             } else {
-                server_error("Channel handle not zero");
-                if (channel_handle != 0) do_close_channel = true;
+                server_error("Channel handle not zero or could not open channel");
+                if (http_get_handle() != 0) do_close_channel = true;
             }
         }
 
@@ -230,7 +229,7 @@ static void task_http(void *argument) {
         // Respond to unexpected channel closure
         if (channel_was_closed) {
             enum MvClosureReason reason = 0;
-            if (mvGetChannelClosureReason(channel_handle, &reason) == MV_STATUS_OKAY) {
+            if (mvGetChannelClosureReason(http_get_handle(), &reason) == MV_STATUS_OKAY) {
                 server_log("Closure reason: %lu", (uint32_t)reason);
             }
 
