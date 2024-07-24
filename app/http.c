@@ -102,6 +102,17 @@ void http_close_channel(void) {
 
 
 /**
+ * @brief Provide the current channel handle.
+ *
+ * @returns The channel handle.
+ */
+MvChannelHandle http_get_handle(void) {
+
+    return http_handles.channel;
+}
+
+
+/**
  * @brief Configure the channel Notification Center.
  */
 void http_setup_notification_center(void) {

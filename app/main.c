@@ -41,13 +41,6 @@ static struct MvNotification sys_notification_center[4] __attribute__((aligned(8
 // Modified in ISR
 static volatile uint32_t current_notification_index = 0;
 
-// These variables are defined in `http.c`
-extern struct {
-    MvNotificationHandle notification;
-    MvNetworkHandle      network;
-    MvChannelHandle      channel;
-} http_handles;
-
 // Local notification center/emitter handles
 MvNotificationHandle sys_nc_handle;
 MvSystemEventHandle sys_emitter_handle;
@@ -214,19 +207,20 @@ static void task_http(void *argument) {
 
     // Run the thread's main loop
     while (1) {
+        MvChannelHandle channel_handle = http_get_handle();
         uint32_t tick = HAL_GetTick();
         if (tick - send_tick > REQUEST_SEND_PERIOD_MS) {
             // Display the current count
             send_tick = tick;
             server_log("Ping %lu", ping_count++);
 
-            // No channel open?
-            if (http_handles.channel == 0 && http_open_channel()) {
+            // No channel open? The try and open a new one
+            if (channel_handle == 0 && http_open_channel()) {
                 if (http_send_request(ping_count) != 0) do_close_channel = true;
                 kill_time = tick;
             } else {
                 server_error("Channel handle not zero");
-                if (http_handles.channel != 0) do_close_channel = true;
+                if (channel_handle != 0) do_close_channel = true;
             }
         }
 
@@ -236,7 +230,7 @@ static void task_http(void *argument) {
         // Respond to unexpected channel closure
         if (channel_was_closed) {
             enum MvClosureReason reason = 0;
-            if (mvGetChannelClosureReason(http_handles.channel, &reason) == MV_STATUS_OKAY) {
+            if (mvGetChannelClosureReason(channel_handle, &reason) == MV_STATUS_OKAY) {
                 server_log("Closure reason: %lu", (uint32_t)reason);
             }
 
@@ -281,7 +275,8 @@ static void process_http_response(void) {
     // We have received data via the active HTTP channel so establish
     // an `MvHttpResponseData` record to hold response metadata
     static struct MvHttpResponseData resp_data;
-    enum MvStatus status = mvReadHttpResponseData(http_handles.channel, &resp_data);
+    MvChannelHandle channel_handle = http_get_handle();
+    enum MvStatus status = mvReadHttpResponseData(channel_handle, &resp_data);
     if (status == MV_STATUS_OKAY) {
         // Check we successfully issued the request (`result` is OK) and
         // the request was successful (status code 200)
@@ -294,7 +289,7 @@ static void process_http_response(void) {
                 // the response body into
                 uint8_t buffer[resp_data.body_length + 1];
                 memset((void *)buffer, 0x00, resp_data.body_length + 1);
-                status = mvReadHttpResponseBody(http_handles.channel, 0, buffer, resp_data.body_length);
+                status = mvReadHttpResponseBody(channel_handle, 0, buffer, resp_data.body_length);
                 if (status == MV_STATUS_OKAY) {
                     // Retrieved the body data successfully so log it
                     server_log("Message JSON:\n%s", buffer);
@@ -330,7 +325,7 @@ static void output_headers(uint32_t num_headers) {
     if (num_headers > 0) {
         for (uint32_t i = 0 ; i < num_headers ; ++i) {
             memset((void *)buffer, 0x00, 256);
-            if (mvReadHttpResponseHeader(http_handles.channel, i, buffer, 255) == MV_STATUS_OKAY) {
+            if (mvReadHttpResponseHeader(http_get_handle(), i, buffer, 255) == MV_STATUS_OKAY) {
                 server_log("Header %02lu. %s", i + 1, buffer);
             } else {
                 server_error("Could not read header %lu", i + 1);

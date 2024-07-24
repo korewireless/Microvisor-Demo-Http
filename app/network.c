@@ -93,7 +93,7 @@ static void net_setup_notification_center(void) {
         // Ask Microvisor to establish the notification center
         // and confirm that it has accepted the request
         enum MvStatus status = mvSetupNotifications(&net_notification_config, &net_handles.notification);
-        do_assert(status == MV_STATUS_OKAY, "Could not start network NC");
+        do_assert(status == MV_STATUS_OKAY, "Could not start network Notification Center");
 
         // Start the notification IRQ
         NVIC_ClearPendingIRQ(TIM2_IRQn);
