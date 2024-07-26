@@ -281,8 +281,7 @@ static void process_http_response(void) {
         // the request was successful (status code 200)
         if (resp_data.result == MV_HTTPRESULT_OK) {
             if (resp_data.status_code == 200) {
-                server_log("HTTP response header count: %lu", resp_data.num_headers);
-                server_log("HTTP response body length: %lu", resp_data.body_length);
+                server_log("HTTP response received. Body length: %lu bytes, %lu headers", resp_data.body_length, resp_data.num_headers);
 
                 // Set up a buffer that we'll get Microvisor to write
                 // the response body into
@@ -335,7 +334,7 @@ static void output_headers(uint32_t num_headers) {
 
 
 /**
- * @brief Configure the System Notification Center.
+ * @brief Configure the System notification center.
  */
 static void setup_sys_notification_center(void) {
 
@@ -353,7 +352,7 @@ static void setup_sys_notification_center(void) {
     // and confirm that it has accepted the request
     enum MvStatus status = mvSetupNotifications(&sys_notification_setup, &sys_nc_handle);
     do_assert(status == MV_STATUS_OKAY, "Could not set up sys NC");
-    server_log("System Notification Center handle: %lu", (uint32_t)sys_nc_handle);
+    server_log("System notification center handle: %lu", (uint32_t)sys_nc_handle);
 
     // Tell Microvisor to use the new notification center for system notifications
     const struct MvOpenSystemNotificationParams sys_notification_params = {
@@ -411,7 +410,7 @@ static void do_clear_led(void* arg) {
 
 
 /**
- * @brief The System Notification Center interrupt handler.
+ * @brief The System notification center interrupt handler.
  *
  * This is called by Microvisor -- we need to check for key events
  * such as polite deployment.

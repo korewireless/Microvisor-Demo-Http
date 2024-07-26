@@ -112,7 +112,7 @@ MvChannelHandle http_get_handle(void) {
 
 
 /**
- * @brief Configure the channel Notification Center.
+ * @brief Configure the channel notification center.
  */
 void http_setup_notification_center(void) {
 
@@ -129,12 +129,12 @@ void http_setup_notification_center(void) {
     // Ask Microvisor to establish the notification center
     // and confirm that it has accepted the request
     enum MvStatus status = mvSetupNotifications(&http_notification_setup, &http_handles.notification);
-    do_assert(status == MV_STATUS_OKAY, "Could not set up HTTP channel Notification Center");
+    do_assert(status == MV_STATUS_OKAY, "Could not set up HTTP channel notification center");
 
     // Start the notification IRQ
     NVIC_ClearPendingIRQ(TIM8_BRK_IRQn);
     NVIC_EnableIRQ(TIM8_BRK_IRQn);
-    server_log("HTTP Notification Center handle: %lu", (uint32_t)http_handles.notification);
+    server_log("HTTP notification center handle: %lu", (uint32_t)http_handles.notification);
 }
 
 
@@ -158,8 +158,8 @@ enum MvStatus http_send_request(uint32_t item_number) {
     // Set up the request
     const char verb[] = "GET";
     const char body[] = "";
-    char url[46] = "";
-    sprintf(url, "https://jsonplaceholder.typicode.com/todos/%lu", item_number);
+    char url[64] = "";
+    snprintf(url, 64, "https://jsonplaceholder.typicode.com/todos/%lu", item_number);
     const struct MvHttpHeader hdrs[] = {};
     const struct MvHttpRequest request_config = {
         .method = {
