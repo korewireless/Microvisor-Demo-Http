@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
 jobs:
   build_linux_native:
-    name: Build on Linux with native tools
+    name: Build on Linux with native tooling
     runs-on: ubuntu-latest
     steps:
     - name: Get application code
       uses: actions/checkout@v4
       with:
         submodules: 'recursive'
-    - name: Get Pre-reqs
+    - name: Get pre-reqs
       run: DEBIAN_FRONTEND=noninteractive && sudo apt-get update -qq && sudo apt-get install -yqq gcc-arm-none-eabi binutils-arm-none-eabi build-essential libsecret-1-dev cmake curl git
     - name: Build application code
       run: cmake -S . -B build && cmake --build build
@@ -20,6 +20,7 @@ jobs:
       with:
         name: mv-http-demo-linux-native
         path: ${{ github.workspace }}/build/app/mv-http-demo.*
+        if-no-files-found: error
   build_linux_docker:
     name: Build on Linux with Docker
     runs-on: ubuntu-latest
@@ -29,7 +30,7 @@ jobs:
       with:
         submodules: 'recursive'
     - name: Build Docker image
-      run: docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t mv-http-image-lin-dock .
+      run: docker buildx build --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t mv-http-image-lin-dock .
     - name: Build application code
       run: docker run --rm -v $(pwd)/:/home/mvisor/project/ --env BUILD_ONLY=true --name mv-http-lin-dock mv-http-image-lin-dock
     - name: Upload artifacts
@@ -37,6 +38,7 @@ jobs:
       with:
         name: mv-http-demo-linux-docker
         path: ${{ github.workspace }}/build/app/mv-http-demo.*
+        if-no-files-found: error
   build_win_wsl:
     name: Build on Windows with WSL
     runs-on: windows-latest
@@ -52,7 +54,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: 'recursive'
-    - name: Get Pre-reqs
+    - name: Get pre-reqs
       run: DEBIAN_FRONTEND=noninteractive && sudo apt-get update -qq && apt-get install -yqq gcc-arm-none-eabi binutils-arm-none-eabi build-essential libsecret-1-dev cmake curl git
     - name: Build code
       run: cmake -S . -B build && cmake --build build
@@ -61,36 +63,16 @@ jobs:
       with:
         name: mv-http-demo-win-wsl
         path: ${{ github.workspace }}/build/app/mv-http-demo.*
-  build_mac_docker:
-    name: Build on macOS with Docker
-    runs-on: macos-13
+        if-no-files-found: error
+  build_mac_native:
+    name: Build on macOS with native tooling
+    runs-on: macos-latest
     steps:
     - name: Get application code
       uses: actions/checkout@v4
       with:
         submodules: 'recursive'
-    - name: Get Docker
-      run: brew install docker colima
-    - name: Run Docker
-      run: colima start
-    - name: Build docker image
-      run: docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t mv-http-image-mac-dock .
-    - name: Build code
-      run: docker run --rm -v $(pwd)/:/home/mvisor/project/ --env BUILD_ONLY=true --name mv-http-mac-dock mv-http-image-mac-dock
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: mv-http-demo-mac-docker
-        path: ${{ github.workspace }}/build/app/mv-http-demo.*
-  build_mac_native:
-    name: Build on macOS with native tooling
-    runs-on: macos-latest
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'
-    - name: Get Pre-reqs
+    - name: Get pre-reqs
       run: brew install --cask gcc-arm-embedded
     - name: Build code
       run: cmake -S . -B build && cmake --build build
@@ -99,3 +81,4 @@ jobs:
       with:
         name: mv-clock-demo-mac-native
         path: ${{ github.workspace }}/build/app/mv-http-demo.*
+        if-no-files-found: error
